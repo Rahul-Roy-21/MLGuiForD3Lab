@@ -26,7 +26,6 @@ COLORS={
     'GREY_HOVER_FG':'#919191'
 }
 
-
 dataset_frame = CTkFrame(master=root, fg_color=COLORS['SKYBLUE_FG'])
 dataset_frame.grid(row=0,column=0,columnspan=8, sticky=EW,padx=5, pady=(7,0)) # Will span the entire width of root=8
 
@@ -163,6 +162,8 @@ default_panel.grid(row=2,column=1,rowspan=9,columnspan=7,sticky=NSEW,padx=(2,5),
 hyperparam_optim_panel.grid_columnconfigure(0,weight=1)
 model_build_panel.grid_columnconfigure(0,weight=1)
 default_panel.grid_columnconfigure(0,weight=1)
+
+hyperparam_optim_panel.grid_rowconfigure(tuple(range(1,7)), weight=1)
 
 model_build_panel_label=CTkLabel(master=model_build_panel,text='model_build')
 model_build_panel_label.grid(row=0,column=0)
@@ -308,7 +309,6 @@ def build_featureAlgoFrame(
     )
 
     algo_label=CTkLabel(master=featureAlgo_frame, text='Algorithm:', font=my_font1)
-    selected_algorithm.set(listOfAlgorithms[0])
     algo_dropdown=CTkOptionMenu(
         master=featureAlgo_frame, 
         values=listOfAlgorithms,
@@ -321,28 +321,59 @@ def build_featureAlgoFrame(
         fg_color=COLORS['GREY_FG'],
         anchor=CENTER
     )
-
+    
     features_label.grid(row=0,column=0,padx=5,pady=5,sticky=NSEW)
     features_entry.grid(row=0,column=1,columnspan=2,padx=5,pady=5,sticky=NSEW)
     features_selectbtn.grid(row=0,column=3,padx=5,pady=5,sticky=NSEW)
 
     algo_label.grid(row=0,column=4,padx=5,pady=5,sticky=NSEW)
     algo_dropdown.grid(row=0,column=5,columnspan=2,padx=5,pady=5,sticky=NSEW)
+    # algo_dropdown needed later to configure the show_frames() function
+    return algo_dropdown
 
 
-
+# A outer CTkFrame (can be scrollable if needed) with a LabelFrame inside
+# INP: masterFrame on which outerFrame will be framed
+# OUT: labelFrame ref.. to be used for inserting ArgLabelFrames
+def build_ArgListLabelFrame (masterFrame: CTkFrame, label_text: str):
+    label_frame = tk.LabelFrame(masterFrame, text=label_text, font=my_font1, labelanchor="nw", background=COLORS['SKYBLUE_FG'])
+    # FOR TIME BEING
+    label1 = tk.Label(label_frame, text="Label 1:")
+    label1.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+    return label_frame
 
 
 # HYPER_PARAM_OPTIM panel
+HYPER_PARAM_OPTIM_ALGORITHMS=['Random Forest','SVC','LR','LDA']
+
 hp_optim_selected_features=tk.StringVar()
 hp_optim_selected_algorithm=tk.StringVar()
-build_featureAlgoFrame(
+algo_dropdown = build_featureAlgoFrame(
     masterFrame=hyperparam_optim_panel,
-    listOfAlgorithms=['algo11','algo12','algo13'],
+    listOfAlgorithms=HYPER_PARAM_OPTIM_ALGORITHMS,
     listOfFeatures=['f11','f12','f13','f14','f15','f16','f17','f18','f19'],
     selected_features=hp_optim_selected_features,
     selected_algorithm=hp_optim_selected_algorithm
 )
+
+# Frames for different algo.. set up show_frame
+hp_optim_algo_frames = {}
+for algo in HYPER_PARAM_OPTIM_ALGORITHMS:
+    # FOR TIME BEING
+    hp_optim_algo_frames[algo]=build_ArgListLabelFrame(hyperparam_optim_panel, algo)
+
+def show_hyperParamOptim_AlgoLabelFrame(option):
+    for frame in hp_optim_algo_frames.values():
+        frame.grid_remove()
+    hp_optim_algo_frames[option].grid(row=1,column=0,rowspan=6, columnspan=7,sticky=NSEW,padx=8,pady=(2,5))
+    hp_optim_algo_frames[option].grid_columnconfigure(tuple(range(7)), weight=1)
+
+algo_dropdown.configure(command=show_hyperParamOptim_AlgoLabelFrame)
+
+# Setting Default hp_optim_selected_algorithm to index 0 and also displaying that frame (as set doesn't trigger command)
+hp_optim_selected_algorithm.set(HYPER_PARAM_OPTIM_ALGORITHMS[0])
+show_hyperParamOptim_AlgoLabelFrame(HYPER_PARAM_OPTIM_ALGORITHMS[0])
+
 
 # HYPER_PARAM_OPTIM panel
 model_build_selected_features=tk.StringVar()
