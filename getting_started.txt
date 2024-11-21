@@ -1,0 +1,12 @@
+GET ALL AVAILABLE PYTHON INTERPRETER INSTALLED in MACOS
+----
+ls /usr/bin/python* /usr/local/bin/python*
+
+CREATE VENV using a python version (say python3.12)
+----
+virtualenv -p /usr/local/bin/python3 py39env
+source ./py39env/bin/activate
+
+
+
+
