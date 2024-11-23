@@ -1,11 +1,7 @@
-from typing import Optional, Tuple, Union
 from customtkinter import *
 import tkinter as tk
 from PIL import Image
-from os import path as os_path
-
-def getImgPath (img_name, image_dir='images'):
-    return os_path.join(image_dir, img_name)
+from my_utils import *
 
 root=CTk()
 root.title('CSL for D3 lab')
@@ -13,18 +9,7 @@ root.grid_columnconfigure(tuple(range(1,8)), weight=1) # 8 columns
 root.grid_rowconfigure(tuple(range(2,11)),weight=1) # Only Side_panel and task_panel will expand
 
 # FONTS
-my_font1 = CTkFont(family='appleGothic', size=13, weight='bold')
-
-# COLORS
-COLORS={
-    'MEDIUMGREEN_FG':'#218530',
-    'MEDIUMGREEN_HOVER_FG':'#319941',
-    'LIGHTRED_FG':'#c94259',
-    'LIGHTRED_HOVER_FG':'#d9596e',
-    'SKYBLUE_FG':'#99e6ff',
-    'GREY_FG':'#727372',
-    'GREY_HOVER_FG':'#919191'
-}
+my_font1 = CTkFont(family='annai mn', size=13, weight='bold')
 
 dataset_frame = CTkFrame(master=root, fg_color=COLORS['SKYBLUE_FG'])
 dataset_frame.grid(row=0,column=0,columnspan=8, sticky=EW,padx=5, pady=(7,0)) # Will span the entire width of root=8
@@ -317,9 +302,8 @@ def build_featureAlgoFrame(
         variable=selected_algorithm,
         corner_radius=0,
         button_color=COLORS['GREY_FG'],
-        button_hover_color=COLORS['GREY_HOVER_FG'],
-        fg_color=COLORS['GREY_FG'],
-        anchor=CENTER
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
     )
     
     features_label.grid(row=0,column=0,padx=5,pady=5,sticky=NSEW)
@@ -338,8 +322,8 @@ def build_featureAlgoFrame(
 def build_ArgListLabelFrame (masterFrame: CTkFrame, label_text: str):
     label_frame = tk.LabelFrame(masterFrame, text=label_text, font=my_font1, labelanchor="nw", background=COLORS['SKYBLUE_FG'])
     # FOR TIME BEING
-    label1 = tk.Label(label_frame, text="Label 1:")
-    label1.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+    #label1 = tk.Label(label_frame, text="Label 1:")
+    #label1.grid(row=0, column=0, padx=10, pady=5, sticky="w")
     return label_frame
 
 
@@ -362,6 +346,133 @@ for algo in HYPER_PARAM_OPTIM_ALGORITHMS:
     # FOR TIME BEING
     hp_optim_algo_frames[algo]=build_ArgListLabelFrame(hyperparam_optim_panel, algo)
 
+# RF INPUTS-------------------
+RF_METHOD_OPTIONS=['GridSearchCV','Method2','Optuma']
+RF_SCORING_OPTIONS=['accuracy', 'precision','s1','s2','s3','s4','s5','s6','s7','s8']
+
+RF_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[0])
+RF_labelFrame.grid_columnconfigure(tuple(range(6)), weight=1)
+RF_method = build_ArgListLabelFrame(RF_labelFrame, 'Method')
+RF_scoring = build_ArgListLabelFrame(RF_labelFrame, 'Scoring')
+RF_crossValidFold = build_ArgListLabelFrame(RF_labelFrame, 'Cross-Validation Fold')
+RF_hyperParams = build_ArgListLabelFrame(RF_labelFrame, 'HyperParameters')
+
+RF_method.grid(row=0, column=0, columnspan=3, padx=5, pady=2, sticky=NSEW)
+RF_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
+RF_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
+RF_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+
+hp_optim_method=tk.StringVar(value=RF_METHOD_OPTIONS[0])
+RF_method.grid_columnconfigure(0, weight=1)
+RF_method_dropdown=CTkOptionMenu(
+        master=RF_method, 
+        values=RF_METHOD_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=hp_optim_method,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+RF_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+
+hp_optim_scoring=tk.StringVar(value=RF_SCORING_OPTIONS[0])
+RF_scoring.grid_columnconfigure(0, weight=1)
+RF_scoring_dropdown=CTkOptionMenu(
+        master=RF_scoring, 
+        values=RF_SCORING_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=hp_optim_scoring,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+RF_scoring_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+
+hp_optim_cross_valid_folds=tk.IntVar(value=3)
+RF_crossValidFold_rangeEntry = MyIntegerEntry(parent=RF_crossValidFold, min_value=3, max_value=20, my_font=my_font1, tkVar=hp_optim_cross_valid_folds)
+RF_crossValidFold_rangeEntry.grid(row=0, column=0, padx=10, pady=5)
+
+hp_optim_n_estimators={'_FROM':IntVar(value=50), '_TO':IntVar(value=200), '_STEP':IntVar(value=10)}
+RF_hyperParams.grid_columnconfigure(0, weight=1)
+
+RF_nEstimators = build_ArgListLabelFrame(RF_hyperParams, 'n_estimators')
+RF_nEstimators.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+RF_nEstimators_entry = MyStepRangeEntry(
+    parent=RF_nEstimators,
+    from_var=hp_optim_n_estimators['_FROM'],
+    to_var=hp_optim_n_estimators['_TO'],
+    step_var=hp_optim_n_estimators['_STEP'],
+    my_font=my_font1,
+    MIN_VAL=hp_optim_n_estimators['_FROM'].get(),
+    MAX_VAL=hp_optim_n_estimators['_TO'].get(),
+    MAX_STEPS=hp_optim_n_estimators['_STEP'].get()
+)
+RF_nEstimators_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+hp_optim_criterions_options=['gini', 'entropy', 'log_loss']
+hp_optim_criterions=StringVar(value=','.join(hp_optim_criterions_options))
+RF_criterions = build_ArgListLabelFrame(RF_hyperParams, 'criterions')
+RF_criterions.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
+RF_criterions_entry= MultiSelectEntry(
+    parent=RF_criterions,
+    whatToChoosePlural='Criterions',
+    my_font=my_font1,
+    tkVar=hp_optim_criterions,
+    MIN_CHOOSE=2,
+    options=hp_optim_criterions_options
+)
+RF_criterions_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+hp_optim_max_depth={'_FROM':IntVar(value=1), '_TO':IntVar(value=5)}
+RF_maxDepth = build_ArgListLabelFrame(RF_hyperParams, 'max_depth')
+RF_maxDepth.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
+RF_maxDepth_entry = MyRangeEntry(
+    parent=RF_maxDepth,
+    from_var=hp_optim_max_depth['_FROM'],
+    to_var=hp_optim_max_depth['_TO'],
+    my_font=my_font1,
+    MIN_VAL=hp_optim_max_depth['_FROM'].get(),
+    MAX_VAL=30
+)
+RF_maxDepth_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+hp_optim_min_samples_split={'_FROM':IntVar(value=2), '_TO':IntVar(value=5)}
+RF_minSamplesSplit = build_ArgListLabelFrame(RF_hyperParams, 'max_depth')
+RF_minSamplesSplit.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
+RF_minSamplesSplit_entry = MyRangeEntry(
+    parent=RF_minSamplesSplit,
+    from_var=hp_optim_min_samples_split['_FROM'],
+    to_var=hp_optim_min_samples_split['_TO'],
+    my_font=my_font1,
+    MIN_VAL=hp_optim_min_samples_split['_FROM'].get(),
+    MAX_VAL=10
+)
+RF_minSamplesSplit_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+hp_optim_min_samples_leaf={'_FROM':IntVar(value=1), '_TO':IntVar(value=5)}
+RF_minSamplesLeaf = build_ArgListLabelFrame(RF_hyperParams, 'max_depth')
+RF_minSamplesLeaf.grid(row=2, column=1, padx=10, pady=5, sticky=EW)
+RF_minSamplesLeaf_entry = MyRangeEntry(
+    parent=RF_minSamplesLeaf,
+    from_var=hp_optim_min_samples_leaf['_FROM'],
+    to_var=hp_optim_min_samples_leaf['_TO'],
+    my_font=my_font1,
+    MIN_VAL=hp_optim_min_samples_leaf['_FROM'].get(),
+    MAX_VAL=10
+)
+RF_minSamplesLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+
+
+
+hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[0]]=RF_labelFrame
+
 def show_hyperParamOptim_AlgoLabelFrame(option):
     for frame in hp_optim_algo_frames.values():
         frame.grid_remove()
@@ -375,7 +486,9 @@ hp_optim_selected_algorithm.set(HYPER_PARAM_OPTIM_ALGORITHMS[0])
 show_hyperParamOptim_AlgoLabelFrame(HYPER_PARAM_OPTIM_ALGORITHMS[0])
 
 
-# HYPER_PARAM_OPTIM panel
+
+
+# MODEL_BUILD panel
 model_build_selected_features=tk.StringVar()
 model_build_selected_algorithm=tk.StringVar()
 build_featureAlgoFrame(

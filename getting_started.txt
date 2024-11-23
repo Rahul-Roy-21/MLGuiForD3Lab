@@ -10,3 +10,11 @@ source ./py39env/bin/activate
 
 
 
+Vector Icons and Stickers - PNG, SVG, EPS, PSD ...
+
+Flaticon
+https://www.flaticon.com
+
+
+
+
