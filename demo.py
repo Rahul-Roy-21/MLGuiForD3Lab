@@ -253,44 +253,24 @@ class FeatureSelectionDialog(CTkToplevel):
         )
         self.destroy()
 
-
 def build_featureAlgoFrame(
         masterFrame: CTkFrame, listOfAlgorithms: list[str], listOfFeatures: list[str], 
         selected_features: tk.StringVar, selected_algorithm: tk.StringVar
     ):
     featureAlgo_frame=CTkFrame(master=masterFrame, fg_color=COLORS['SKYBLUE_FG'])
     featureAlgo_frame.grid(row=0,column=0,columnspan=7,sticky=NSEW,padx=(5,2),pady=5)
-    featureAlgo_frame.grid_columnconfigure((1,2), weight=3)
-    featureAlgo_frame.grid_columnconfigure((5,6), weight=1)
-    # ROW (idx): featureLabel(0)--featureEntry(1,2)--featureSelectBtn(3)--algoLabel(4)--algoDropDown(5,6)
+    featureAlgo_frame.grid_columnconfigure((1,2,3,5,6), weight=1)
+    # ROW (idx): featureLabel(0)--featureMultiSelectEntry(1,2,3)--algoLabel(4)--algoDropDown(5,6)
 
     features_label=CTkLabel(master=featureAlgo_frame, text='Features list:', font=my_font1)
-    features_entry=CTkEntry(
-        master=featureAlgo_frame,
-        textvariable=selected_features,
-        border_width=1,
-        border_color=COLORS['GREY_HOVER_FG'],
-        corner_radius=0,
-        font=my_font1,
-        state=DISABLED
-    )
-
-    def open_inputDialog_for_featureSelect():
-        FeatureSelectionDialog(masterFrame, listOfFeatures, selected_features)
-
-    select_img=CTkImage(light_image=Image.open(getImgPath('search.png')), size=(30, 30))
-    features_selectbtn=CTkButton(
-        master=featureAlgo_frame,
-        text="Select", 
-        image=select_img,
-        compound=LEFT,
-        font=my_font1,
-        fg_color=COLORS['GREY_FG'],
-        hover_color=COLORS['GREY_HOVER_FG'],
-        text_color='white',
-        corner_radius=0,
-        width=100,
-        command=open_inputDialog_for_featureSelect
+    selected_features.set(','.join(listOfFeatures))
+    features_multiSelectEntry = MultiSelectEntry(
+        parent=featureAlgo_frame,
+        whatToChoosePlural='Features',
+        my_font=my_font1,
+        tkVar=selected_features,
+        MIN_CHOOSE=2,
+        options=listOfFeatures
     )
 
     algo_label=CTkLabel(master=featureAlgo_frame, text='Algorithm:', font=my_font1)
@@ -307,8 +287,7 @@ def build_featureAlgoFrame(
     )
     
     features_label.grid(row=0,column=0,padx=5,pady=5,sticky=NSEW)
-    features_entry.grid(row=0,column=1,columnspan=2,padx=5,pady=5,sticky=NSEW)
-    features_selectbtn.grid(row=0,column=3,padx=5,pady=5,sticky=NSEW)
+    features_multiSelectEntry.grid(row=0,column=1,columnspan=3,padx=5,pady=5,sticky=NSEW)
 
     algo_label.grid(row=0,column=4,padx=5,pady=5,sticky=NSEW)
     algo_dropdown.grid(row=0,column=5,columnspan=2,padx=5,pady=5,sticky=NSEW)
@@ -468,8 +447,19 @@ RF_minSamplesLeaf_entry = MyRangeEntry(
 )
 RF_minSamplesLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-
-
+RF_submitBtn = CTkButton(
+    master=RF_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=300,
+    border_spacing=0,
+    command=lambda: print('Submit')
+)
+RF_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
 hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[0]]=RF_labelFrame
 

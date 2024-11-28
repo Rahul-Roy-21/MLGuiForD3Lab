@@ -72,7 +72,7 @@ class MyIntegerEntry(CTkFrame):
             self, image=self.minus_image, text="", 
             fg_color=COLORS["SKYBLUE_FG"],
             hover_color=COLORS["LIGHTRED_HOVER_FG"],
-            command=self.decrement, width=30
+            command=self.decrement, width=20
         )
         self.decrement_button.grid(row=0, column=0)
         self.decrement_button.bind("<ButtonPress-1>", lambda event: self.start_repeat(self.decrement))
@@ -90,7 +90,7 @@ class MyIntegerEntry(CTkFrame):
             self, image=self.plus_image, text="", 
             fg_color=COLORS["SKYBLUE_FG"],
             hover_color=COLORS["MEDIUMGREEN_HOVER_FG"],
-            command=self.increment, width=30
+            command=self.increment, width=20
         )
         self.increment_button.grid(row=0, column=2)
         self.increment_button.bind("<ButtonPress-1>", lambda event: self.start_repeat(self.increment))
@@ -139,12 +139,12 @@ class MyRangeEntry(CTkFrame):
         self.to_var.trace_add("write", self.sync_from_var)
 
         self.label_from = CTkLabel(self, text="From:", font=my_font, fg_color=COLORS["SKYBLUE_FG"])
-        self.label_from.grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.label_from.grid(row=0, column=0, padx=2, pady=5, sticky="e")
         self.entry_from = MyIntegerEntry(parent=self, my_font=my_font, tkVar=self.from_var, min_value=MIN_VAL, max_value=MAX_VAL-1)
         self.entry_from.grid(row=0, column=1, padx=5, pady=5, sticky="w")
 
         self.label_to = CTkLabel(self, text="To:", font=my_font, fg_color=COLORS["SKYBLUE_FG"])
-        self.label_to.grid(row=0, column=2, padx=5, pady=5, sticky="e")
+        self.label_to.grid(row=0, column=2, padx=2, pady=5, sticky="e")
         self.entry_to = MyIntegerEntry(parent=self, my_font=my_font, tkVar=self.to_var, min_value=MIN_VAL+1, max_value=MAX_VAL)
         self.entry_to.grid(row=0, column=3, padx=5, pady=5, sticky="w")
     
