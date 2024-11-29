@@ -425,7 +425,7 @@ RF_maxDepth_entry = MyRangeEntry(
 RF_maxDepth_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 RFVar_min_samples_split={'_FROM':IntVar(value=2), '_TO':IntVar(value=5)}
-RF_minSamplesSplit = build_ArgListLabelFrame(RF_hyperParams, 'max_depth')
+RF_minSamplesSplit = build_ArgListLabelFrame(RF_hyperParams, 'min_sample_split')
 RF_minSamplesSplit.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
 RF_minSamplesSplit_entry = MyRangeEntry(
     parent=RF_minSamplesSplit,
@@ -438,7 +438,7 @@ RF_minSamplesSplit_entry = MyRangeEntry(
 RF_minSamplesSplit_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 RFVar_min_samples_leaf={'_FROM':IntVar(value=1), '_TO':IntVar(value=5)}
-RF_minSamplesLeaf = build_ArgListLabelFrame(RF_hyperParams, 'max_depth')
+RF_minSamplesLeaf = build_ArgListLabelFrame(RF_hyperParams, 'min_sample_leaf')
 RF_minSamplesLeaf.grid(row=2, column=1, padx=10, pady=5, sticky=EW)
 RF_minSamplesLeaf_entry = MyRangeEntry(
     parent=RF_minSamplesLeaf,
