@@ -9,8 +9,9 @@ COLORS={
     'LIGHTRED_FG':'#c94259',
     'LIGHTRED_HOVER_FG':'#d9596e',
     'SKYBLUE_FG':'#99e6ff',
-    'GREY_FG':'#727372',
-    'GREY_HOVER_FG':'#919191'
+    'GREY_HOVER_FG':'#a3a2a3',
+    'GREY_FG':'#6b6a6b',
+    'LIGHT_YELLOW_FG':'#fff1cc'
 }
 
 def getImgPath (img_name, image_dir='images'):
@@ -312,3 +313,35 @@ class MultiSelectDialog(CTkToplevel):
         if self.checkboxes[choice].get()==0 and sum(cbox.get() for cbox in self.checkboxes.values()) < self.MIN_CHOOSE:
             self.checkboxes[choice].select()
     
+class SyncableTextBox(CTkTextbox):
+    def __init__(self, master, text_variable: StringVar, my_font: CTkFont, **kwargs):
+        """
+        A CTkTextbox synchronized with a StringVar.
+        :param master: The parent widget.
+        :param text_variable: A StringVar to synchronize with the textbox content.
+        """
+        super().__init__(master, height=100, font=my_font, fg_color=COLORS["LIGHT_YELLOW_FG"] ,**kwargs)
+        self.text_variable = text_variable
+
+        # Bind the StringVar to update the textbox when it changes
+        self.text_variable.trace_add("write", self._update_textbox)
+
+        # Insert initial content from StringVar
+        self.insert("1.0", self.text_variable.get())
+
+        # Set "normal" for optionally enable editing, Set to "disabled" for read-only
+        self.configure(state="disabled")  
+
+        # Bind to update the StringVar when the content of the textbox changes
+        self.bind("<KeyRelease>", self._update_stringvar)
+
+    def _update_textbox(self, *args):
+        """Update the content of the textbox when the StringVar changes."""
+        self.configure(state="normal")  # Temporarily enable editing to update content
+        self.delete("1.0", "end")
+        self.insert("1.0", self.text_variable.get())
+        self.configure(state="disabled")  # Keep non-editable (or set to "disabled" for read-only)
+
+    def _update_stringvar(self, event=None):
+        """Update the StringVar when the content of the textbox changes."""
+        self.text_variable.set(self.get("1.0", "end-1c"))

@@ -9,7 +9,7 @@ source ./py39env/bin/activate
 
 
 
-
+FOR ICONS___
 Vector Icons and Stickers - PNG, SVG, EPS, PSD ...
 
 Flaticon

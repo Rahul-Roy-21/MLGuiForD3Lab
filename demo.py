@@ -3,13 +3,15 @@ import tkinter as tk
 from PIL import Image
 from my_utils import *
 
+set_appearance_mode('light')
+
 root=CTk()
 root.title('CSL for D3 lab')
 root.grid_columnconfigure(tuple(range(1,8)), weight=1) # 8 columns
 root.grid_rowconfigure(tuple(range(2,11)),weight=1) # Only Side_panel and task_panel will expand
 
 # FONTS
-my_font1 = CTkFont(family='annai mn', size=13, weight='bold')
+my_font1 = CTkFont(family='annai mn', size=11, weight='bold')
 
 dataset_frame = CTkFrame(master=root, fg_color=COLORS['SKYBLUE_FG'])
 dataset_frame.grid(row=0,column=0,columnspan=8, sticky=EW,padx=5, pady=(7,0)) # Will span the entire width of root=8
@@ -335,11 +337,13 @@ RF_method = build_ArgListLabelFrame(RF_labelFrame, 'Method')
 RF_scoring = build_ArgListLabelFrame(RF_labelFrame, 'Scoring')
 RF_crossValidFold = build_ArgListLabelFrame(RF_labelFrame, 'Cross-Validation Fold')
 RF_hyperParams = build_ArgListLabelFrame(RF_labelFrame, 'HyperParameters')
+RF_results = build_ArgListLabelFrame(RF_labelFrame, 'Result')
 
 RF_method.grid(row=0, column=0, columnspan=3, padx=5, pady=2, sticky=NSEW)
 RF_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
 RF_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
 RF_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+RF_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 
 hp_optim_method=tk.StringVar(value=RF_METHOD_OPTIONS[0])
 RF_method.grid_columnconfigure(0, weight=1)
@@ -461,6 +465,15 @@ RF_submitBtn = CTkButton(
 )
 RF_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
+RF_results.grid_columnconfigure(0, weight=1)
+RF_resultsVar = StringVar(value="...")
+RF_resultTextBox = SyncableTextBox(
+    master=RF_results,
+    text_variable=RF_resultsVar,
+    my_font=my_font1
+)
+RF_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
 hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[0]]=RF_labelFrame
 
 def show_hyperParamOptim_AlgoLabelFrame(option):
@@ -474,7 +487,6 @@ algo_dropdown.configure(command=show_hyperParamOptim_AlgoLabelFrame)
 # Setting Default hp_optim_selected_algorithm to index 0 and also displaying that frame (as set doesn't trigger command)
 hp_optim_selected_algorithm.set(HYPER_PARAM_OPTIM_ALGORITHMS[0])
 show_hyperParamOptim_AlgoLabelFrame(HYPER_PARAM_OPTIM_ALGORITHMS[0])
-
 
 
 
