@@ -309,7 +309,7 @@ def build_ArgListLabelFrame (masterFrame: CTkFrame, label_text: str):
 
 
 # HYPER_PARAM_OPTIM panel
-HYPER_PARAM_OPTIM_ALGORITHMS=['Random Forest','SVC','LR','LDA']
+HYPER_PARAM_OPTIM_ALGORITHMS=['Random Forest','Support Vector Machine','Logistic Regression','Linear Discriminant Analysis']
 
 hp_optim_selected_features=tk.StringVar()
 hp_optim_selected_algorithm=tk.StringVar()
@@ -328,8 +328,8 @@ for algo in HYPER_PARAM_OPTIM_ALGORITHMS:
     hp_optim_algo_frames[algo]=build_ArgListLabelFrame(hyperparam_optim_panel, algo)
 
 # RF INPUTS-------------------
-RF_METHOD_OPTIONS=['GridSearchCV','Method2','Optuma']
-RF_SCORING_OPTIONS=['accuracy', 'precision','s1','s2','s3','s4','s5','s6','s7','s8']
+METHOD_OPTIONS=['GridSearchCV','Method2','Optuma']
+SCORING_OPTIONS=['accuracy', 'precision','s1','s2','s3','s4','s5','s6','s7','s8']
 
 RF_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[0])
 RF_labelFrame.grid_columnconfigure(tuple(range(6)), weight=1)
@@ -345,14 +345,14 @@ RF_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
 RF_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 RF_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 
-hp_optim_method=tk.StringVar(value=RF_METHOD_OPTIONS[0])
+RFVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
 RF_method.grid_columnconfigure(0, weight=1)
 RF_method_dropdown=CTkOptionMenu(
         master=RF_method, 
-        values=RF_METHOD_OPTIONS,
+        values=METHOD_OPTIONS,
         font=my_font1,
         dropdown_font=my_font1,
-        variable=hp_optim_method,
+        variable=RFVar_method,
         corner_radius=0,
         button_color=COLORS['GREY_FG'],
         button_hover_color=COLORS['GREY_FG'],
@@ -361,14 +361,14 @@ RF_method_dropdown=CTkOptionMenu(
 RF_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 
-hp_optim_scoring=tk.StringVar(value=RF_SCORING_OPTIONS[0])
+RFVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
 RF_scoring.grid_columnconfigure(0, weight=1)
 RF_scoring_dropdown=CTkOptionMenu(
         master=RF_scoring, 
-        values=RF_SCORING_OPTIONS,
+        values=SCORING_OPTIONS,
         font=my_font1,
         dropdown_font=my_font1,
-        variable=hp_optim_scoring,
+        variable=RFVar_scoring,
         corner_radius=0,
         button_color=COLORS['GREY_FG'],
         button_hover_color=COLORS['GREY_FG'],
@@ -376,77 +376,76 @@ RF_scoring_dropdown=CTkOptionMenu(
     )
 RF_scoring_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-
-hp_optim_cross_valid_folds=tk.IntVar(value=3)
-RF_crossValidFold_rangeEntry = MyIntegerEntry(parent=RF_crossValidFold, min_value=3, max_value=20, my_font=my_font1, tkVar=hp_optim_cross_valid_folds)
+RFVar_cross_valid_folds=tk.IntVar(value=3)
+RF_crossValidFold_rangeEntry = MyIntegerEntry(parent=RF_crossValidFold, min_value=3, max_value=20, my_font=my_font1, tkVar=RFVar_cross_valid_folds)
 RF_crossValidFold_rangeEntry.grid(row=0, column=0, padx=10, pady=5)
 
-hp_optim_n_estimators={'_FROM':IntVar(value=50), '_TO':IntVar(value=200), '_STEP':IntVar(value=10)}
-RF_hyperParams.grid_columnconfigure(0, weight=1)
+RF_hyperParams.grid_columnconfigure((0,1), weight=1)
 
+RFVar_n_estimators={'_FROM':IntVar(value=50), '_TO':IntVar(value=200), '_STEP':IntVar(value=10)}
 RF_nEstimators = build_ArgListLabelFrame(RF_hyperParams, 'n_estimators')
 RF_nEstimators.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
 RF_nEstimators_entry = MyStepRangeEntry(
     parent=RF_nEstimators,
-    from_var=hp_optim_n_estimators['_FROM'],
-    to_var=hp_optim_n_estimators['_TO'],
-    step_var=hp_optim_n_estimators['_STEP'],
+    from_var=RFVar_n_estimators['_FROM'],
+    to_var=RFVar_n_estimators['_TO'],
+    step_var=RFVar_n_estimators['_STEP'],
     my_font=my_font1,
-    MIN_VAL=hp_optim_n_estimators['_FROM'].get(),
-    MAX_VAL=hp_optim_n_estimators['_TO'].get(),
-    MAX_STEPS=hp_optim_n_estimators['_STEP'].get()
+    MIN_VAL=RFVar_n_estimators['_FROM'].get(),
+    MAX_VAL=RFVar_n_estimators['_TO'].get(),
+    MAX_STEPS=RFVar_n_estimators['_STEP'].get()
 )
 RF_nEstimators_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-hp_optim_criterions_options=['gini', 'entropy', 'log_loss']
-hp_optim_criterions=StringVar(value=','.join(hp_optim_criterions_options))
+RFVar_criterions_options=['gini', 'entropy', 'log_loss']
+RFVar_criterions=StringVar(value=','.join(RFVar_criterions_options))
 RF_criterions = build_ArgListLabelFrame(RF_hyperParams, 'criterions')
 RF_criterions.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
 RF_criterions_entry= MultiSelectEntry(
     parent=RF_criterions,
     whatToChoosePlural='Criterions',
     my_font=my_font1,
-    tkVar=hp_optim_criterions,
+    tkVar=RFVar_criterions,
     MIN_CHOOSE=2,
-    options=hp_optim_criterions_options
+    options=RFVar_criterions_options
 )
 RF_criterions_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-hp_optim_max_depth={'_FROM':IntVar(value=1), '_TO':IntVar(value=5)}
+RFVar_max_depth={'_FROM':IntVar(value=1), '_TO':IntVar(value=5)}
 RF_maxDepth = build_ArgListLabelFrame(RF_hyperParams, 'max_depth')
 RF_maxDepth.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
 RF_maxDepth_entry = MyRangeEntry(
     parent=RF_maxDepth,
-    from_var=hp_optim_max_depth['_FROM'],
-    to_var=hp_optim_max_depth['_TO'],
+    from_var=RFVar_max_depth['_FROM'],
+    to_var=RFVar_max_depth['_TO'],
     my_font=my_font1,
-    MIN_VAL=hp_optim_max_depth['_FROM'].get(),
+    MIN_VAL=RFVar_max_depth['_FROM'].get(),
     MAX_VAL=30
 )
 RF_maxDepth_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-hp_optim_min_samples_split={'_FROM':IntVar(value=2), '_TO':IntVar(value=5)}
+RFVar_min_samples_split={'_FROM':IntVar(value=2), '_TO':IntVar(value=5)}
 RF_minSamplesSplit = build_ArgListLabelFrame(RF_hyperParams, 'max_depth')
 RF_minSamplesSplit.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
 RF_minSamplesSplit_entry = MyRangeEntry(
     parent=RF_minSamplesSplit,
-    from_var=hp_optim_min_samples_split['_FROM'],
-    to_var=hp_optim_min_samples_split['_TO'],
+    from_var=RFVar_min_samples_split['_FROM'],
+    to_var=RFVar_min_samples_split['_TO'],
     my_font=my_font1,
-    MIN_VAL=hp_optim_min_samples_split['_FROM'].get(),
+    MIN_VAL=RFVar_min_samples_split['_FROM'].get(),
     MAX_VAL=10
 )
 RF_minSamplesSplit_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-hp_optim_min_samples_leaf={'_FROM':IntVar(value=1), '_TO':IntVar(value=5)}
+RFVar_min_samples_leaf={'_FROM':IntVar(value=1), '_TO':IntVar(value=5)}
 RF_minSamplesLeaf = build_ArgListLabelFrame(RF_hyperParams, 'max_depth')
 RF_minSamplesLeaf.grid(row=2, column=1, padx=10, pady=5, sticky=EW)
 RF_minSamplesLeaf_entry = MyRangeEntry(
     parent=RF_minSamplesLeaf,
-    from_var=hp_optim_min_samples_leaf['_FROM'],
-    to_var=hp_optim_min_samples_leaf['_TO'],
+    from_var=RFVar_min_samples_leaf['_FROM'],
+    to_var=RFVar_min_samples_leaf['_TO'],
     my_font=my_font1,
-    MIN_VAL=hp_optim_min_samples_leaf['_FROM'].get(),
+    MIN_VAL=RFVar_min_samples_leaf['_FROM'].get(),
     MAX_VAL=10
 )
 RF_minSamplesLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
@@ -475,6 +474,126 @@ RF_resultTextBox = SyncableTextBox(
 RF_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
 
 hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[0]]=RF_labelFrame
+
+
+# SVM inputs
+SVM_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[1])
+SVM_labelFrame.grid_columnconfigure(tuple(range(7)), weight=1)
+SVM_method = build_ArgListLabelFrame(SVM_labelFrame, 'Method')
+SVM_scoring = build_ArgListLabelFrame(SVM_labelFrame, 'Scoring')
+SVM_crossValidFold = build_ArgListLabelFrame(SVM_labelFrame, 'Cross-Validation Fold')
+SVM_hyperParams = build_ArgListLabelFrame(SVM_labelFrame, 'HyperParameters')
+SVM_results = build_ArgListLabelFrame(SVM_labelFrame, 'Result')
+
+SVM_method.grid(row=0, column=0, columnspan=3, padx=5, pady=2, sticky=NSEW)
+SVM_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
+SVM_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
+SVM_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+SVM_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+
+SVMVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+SVM_method.grid_columnconfigure(0, weight=1)
+SVM_method_dropdown=CTkOptionMenu(
+        master=SVM_method, 
+        values=METHOD_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=SVMVar_method,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+SVM_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+SVM_scoring.grid_columnconfigure(0, weight=1)
+SVM_scoring_dropdown=CTkOptionMenu(
+        master=SVM_scoring, 
+        values=SCORING_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=SVMVar_scoring,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+SVM_scoring_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMVar_cross_valid_folds=tk.IntVar(value=3)
+SVM_crossValidFold_rangeEntry = MyIntegerEntry(parent=SVM_crossValidFold, min_value=3, max_value=20, my_font=my_font1, tkVar=SVMVar_cross_valid_folds)
+SVM_crossValidFold_rangeEntry.grid(row=0, column=0, padx=10, pady=5)
+
+SVM_hyperParams.grid_columnconfigure((0,1), weight=1)
+
+SVMVar_C_options=['0.1','1','10','100','1000']
+SVMVar_C=StringVar(value=','.join(SVMVar_C_options))
+SVM_C_lb = build_ArgListLabelFrame(SVM_hyperParams, 'C')
+SVM_C_lb.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+SVM_C_entry= MultiSelectEntry(
+    parent=SVM_C_lb,
+    whatToChoosePlural='C value(s)',
+    my_font=my_font1,
+    tkVar=SVMVar_C,
+    MIN_CHOOSE=2,
+    options=SVMVar_C_options
+)
+SVM_C_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMVar_kernel_options=['linear','poly','rbf']
+SVMVar_kernel=StringVar(value=','.join(SVMVar_kernel_options))
+SVM_kernel = build_ArgListLabelFrame(SVM_hyperParams, 'kernel')
+SVM_kernel.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+SVM_kernel_entry= MultiSelectEntry(
+    parent=SVM_kernel,
+    whatToChoosePlural='kernel(s)',
+    my_font=my_font1,
+    tkVar=SVMVar_kernel,
+    MIN_CHOOSE=2,
+    options=SVMVar_kernel_options
+)
+SVM_kernel_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMVar_gamma_options=['scale','auto']
+SVMVar_gamma=StringVar(value=','.join(SVMVar_gamma_options))
+SVM_gamma = build_ArgListLabelFrame(SVM_hyperParams, 'gamma')
+SVM_gamma.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+SVM_gamma_entry= MultiSelectEntry(
+    parent=SVM_gamma,
+    whatToChoosePlural='gamma value(s)',
+    my_font=my_font1,
+    tkVar=SVMVar_gamma,
+    MIN_CHOOSE=2,
+    options=SVMVar_gamma_options
+)
+SVM_gamma_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVM_submitBtn = CTkButton(
+    master=SVM_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=300,
+    border_spacing=0,
+    command=lambda: print('Submit')
+)
+SVM_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+
+SVM_results.grid_columnconfigure(0, weight=1)
+SVM_resultsVar = StringVar(value="...")
+SVM_resultTextBox = SyncableTextBox(
+    master=SVM_results,
+    text_variable=SVM_resultsVar,
+    my_font=my_font1
+)
+SVM_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+
+hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[1]]=SVM_labelFrame
 
 def show_hyperParamOptim_AlgoLabelFrame(option):
     for frame in hp_optim_algo_frames.values():
