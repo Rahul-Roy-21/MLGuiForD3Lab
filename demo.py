@@ -309,7 +309,15 @@ def build_ArgListLabelFrame (masterFrame: CTkFrame, label_text: str):
 
 
 # HYPER_PARAM_OPTIM panel
-HYPER_PARAM_OPTIM_ALGORITHMS=['Random Forest','Support Vector Machine','Logistic Regression','Linear Discriminant Analysis']
+HYPER_PARAM_OPTIM_ALGORITHMS=[
+    'Random Forest',
+    'Support Vector Machine',
+    'Logistic Regression',
+    'Linear Discriminant Analysis',
+    'K-Nearest Neighbors',
+    'GradientBoosting',
+    'Multi-Layer Perceptron (ANN)'
+]
 
 hp_optim_selected_features=tk.StringVar()
 hp_optim_selected_algorithm=tk.StringVar()
@@ -803,6 +811,124 @@ LDA_resultTextBox = SyncableTextBox(
 LDA_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
 
 hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[3]]=LDA_labelFrame
+
+
+# KNN
+KNN_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[0])
+KNN_labelFrame.grid_columnconfigure(tuple(range(6)), weight=1)
+KNN_method = build_ArgListLabelFrame(KNN_labelFrame, 'Method')
+KNN_scoring = build_ArgListLabelFrame(KNN_labelFrame, 'Scoring')
+KNN_crossValidFold = build_ArgListLabelFrame(KNN_labelFrame, 'Cross-Validation Fold')
+KNN_hyperParams = build_ArgListLabelFrame(KNN_labelFrame, 'HyperParameters')
+KNN_results = build_ArgListLabelFrame(KNN_labelFrame, 'Result')
+
+KNN_method.grid(row=0, column=0, columnspan=3, padx=5, pady=2, sticky=NSEW)
+KNN_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
+KNN_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
+KNN_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+KNN_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+
+KNNVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+KNN_method.grid_columnconfigure(0, weight=1)
+KNN_method_dropdown=CTkOptionMenu(
+        master=KNN_method, 
+        values=METHOD_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=KNNVar_method,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+KNN_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+
+KNNVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+KNN_scoring.grid_columnconfigure(0, weight=1)
+KNN_scoring_dropdown=CTkOptionMenu(
+        master=KNN_scoring, 
+        values=SCORING_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=KNNVar_scoring,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+KNN_scoring_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+KNNVar_cross_valid_folds=tk.IntVar(value=3)
+KNN_crossValidFold_rangeEntry = MyIntegerEntry(parent=KNN_crossValidFold, min_value=3, max_value=20, my_font=my_font1, tkVar=KNNVar_cross_valid_folds)
+KNN_crossValidFold_rangeEntry.grid(row=0, column=0, padx=10, pady=5)
+
+KNN_hyperParams.grid_columnconfigure((0,1), weight=1)
+
+KNNVar_nNeighbors={'_FROM':IntVar(value=2), '_TO':IntVar(value=20)}
+KNN_nNeighbors = build_ArgListLabelFrame(KNN_hyperParams, 'n_neighbors')
+KNN_nNeighbors.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+KNN_nNeighbors_entry = MyRangeEntry(
+    parent=KNN_nNeighbors,
+    from_var=KNNVar_nNeighbors['_FROM'],
+    to_var=KNNVar_nNeighbors['_TO'],
+    my_font=my_font1,
+    MIN_VAL=KNNVar_nNeighbors['_FROM'].get(),
+    MAX_VAL=20
+)
+KNN_nNeighbors_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+KNNVar_leaf_size={'_FROM':IntVar(value=10), '_TO':IntVar(value=50)}
+KNN_leaf_size = build_ArgListLabelFrame(KNN_hyperParams, 'leaf_size')
+KNN_leaf_size.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+KNN_leaf_size_entry = MyRangeEntry(
+    parent=KNN_leaf_size,
+    from_var=KNNVar_leaf_size['_FROM'],
+    to_var=KNNVar_leaf_size['_TO'],
+    my_font=my_font1,
+    MIN_VAL=KNNVar_leaf_size['_FROM'].get(),
+    MAX_VAL=50
+)
+KNN_leaf_size_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+KNNVar_P={'_FROM':IntVar(value=1), '_TO':IntVar(value=2)}
+KNN_P_lb = build_ArgListLabelFrame(KNN_hyperParams, 'P')
+KNN_P_lb.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+KNN_P_entry = MyRangeEntry(
+    parent=KNN_P_lb,
+    from_var=KNNVar_P['_FROM'],
+    to_var=KNNVar_P['_TO'],
+    my_font=my_font1,
+    MIN_VAL=KNNVar_P['_FROM'].get(),
+    MAX_VAL=5
+)
+KNN_P_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+KNN_submitBtn = CTkButton(
+    master=KNN_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=300,
+    border_spacing=0,
+    command=lambda: print('Submit')
+)
+KNN_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+
+KNN_results.grid_columnconfigure(0, weight=1)
+KNN_resultsVar = StringVar(value="...")
+KNN_resultTextBox = SyncableTextBox(
+    master=KNN_results,
+    text_variable=KNN_resultsVar,
+    my_font=my_font1
+)
+KNN_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[4]]=KNN_labelFrame
+
 
 
 def show_hyperParamOptim_AlgoLabelFrame(option):
