@@ -328,7 +328,7 @@ for algo in HYPER_PARAM_OPTIM_ALGORITHMS:
     hp_optim_algo_frames[algo]=build_ArgListLabelFrame(hyperparam_optim_panel, algo)
 
 # RF INPUTS-------------------
-METHOD_OPTIONS=['GridSearchCV','Method2','Optuma']
+METHOD_OPTIONS=['GridSearchCV','RandomizedSearchCV','Optuna']
 SCORING_OPTIONS=['accuracy', 'precision','s1','s2','s3','s4','s5','s6','s7','s8']
 
 RF_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[0])
@@ -541,7 +541,7 @@ SVM_C_entry= MultiSelectEntry(
 )
 SVM_C_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMVar_kernel_options=['linear','poly','rbf']
+SVMVar_kernel_options=['linear','poly','rbf', 'sigmoid']
 SVMVar_kernel=StringVar(value=','.join(SVMVar_kernel_options))
 SVM_kernel = build_ArgListLabelFrame(SVM_hyperParams, 'kernel')
 SVM_kernel.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
@@ -592,8 +592,218 @@ SVM_resultTextBox = SyncableTextBox(
 )
 SVM_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
 
-
 hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[1]]=SVM_labelFrame
+
+
+# LR inputs
+LR_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[1])
+LR_labelFrame.grid_columnconfigure(tuple(range(7)), weight=1)
+LR_method = build_ArgListLabelFrame(LR_labelFrame, 'Method')
+LR_scoring = build_ArgListLabelFrame(LR_labelFrame, 'Scoring')
+LR_crossValidFold = build_ArgListLabelFrame(LR_labelFrame, 'Cross-Validation Fold')
+LR_hyperParams = build_ArgListLabelFrame(LR_labelFrame, 'HyperParameters')
+LR_results = build_ArgListLabelFrame(LR_labelFrame, 'Result')
+
+LR_method.grid(row=0, column=0, columnspan=3, padx=5, pady=2, sticky=NSEW)
+LR_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
+LR_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
+LR_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+LR_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+
+LRVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+LR_method.grid_columnconfigure(0, weight=1)
+LR_method_dropdown=CTkOptionMenu(
+        master=LR_method, 
+        values=METHOD_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=LRVar_method,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LR_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+LR_scoring.grid_columnconfigure(0, weight=1)
+LR_scoring_dropdown=CTkOptionMenu(
+        master=LR_scoring, 
+        values=SCORING_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=LRVar_scoring,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LR_scoring_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRVar_cross_valid_folds=tk.IntVar(value=3)
+LR_crossValidFold_rangeEntry = MyIntegerEntry(parent=LR_crossValidFold, min_value=3, max_value=20, my_font=my_font1, tkVar=LRVar_cross_valid_folds)
+LR_crossValidFold_rangeEntry.grid(row=0, column=0, padx=10, pady=5)
+
+LR_hyperParams.grid_columnconfigure((0,1), weight=1)
+
+LRVar_C_options=['0.1','1','10']
+LRVar_C=StringVar(value=','.join(LRVar_C_options))
+LR_C_lb = build_ArgListLabelFrame(LR_hyperParams, 'C')
+LR_C_lb.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+LR_C_entry= MultiSelectEntry(
+    parent=LR_C_lb,
+    whatToChoosePlural='C value(s)',
+    my_font=my_font1,
+    tkVar=LRVar_C,
+    MIN_CHOOSE=2,
+    options=LRVar_C_options
+)
+LR_C_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRVar_penalty_options=['l1','l2','elasticnet', 'None']
+LRVar_penalty=StringVar(value=','.join(LRVar_penalty_options))
+LR_penalty = build_ArgListLabelFrame(LR_hyperParams, 'penalty')
+LR_penalty.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+LR_penalty_entry= MultiSelectEntry(
+    parent=LR_penalty,
+    whatToChoosePlural='penalty(s)',
+    my_font=my_font1,
+    tkVar=LRVar_penalty,
+    MIN_CHOOSE=2,
+    options=LRVar_penalty_options
+)
+LR_penalty_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRVar_solver_options=['lbfgs','liblinear','newton-cg','newton-cholesky','sag','saga']
+LRVar_solver=StringVar(value=','.join(LRVar_solver_options))
+LR_solver = build_ArgListLabelFrame(LR_hyperParams, 'solver')
+LR_solver.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+LR_solver_entry= MultiSelectEntry(
+    parent=LR_solver,
+    whatToChoosePlural='solver value(s)',
+    my_font=my_font1,
+    tkVar=LRVar_solver,
+    MIN_CHOOSE=2,
+    options=LRVar_solver_options
+)
+LR_solver_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LR_submitBtn = CTkButton(
+    master=LR_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=300,
+    border_spacing=0,
+    command=lambda: print('Submit')
+)
+LR_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+
+LR_results.grid_columnconfigure(0, weight=1)
+LR_resultsVar = StringVar(value="...")
+LR_resultTextBox = SyncableTextBox(
+    master=LR_results,
+    text_variable=LR_resultsVar,
+    my_font=my_font1
+)
+LR_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[2]]=LR_labelFrame
+
+
+# LDA Inputs
+LDA_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[1])
+LDA_labelFrame.grid_columnconfigure(tuple(range(7)), weight=1)
+LDA_method = build_ArgListLabelFrame(LDA_labelFrame, 'Method')
+LDA_scoring = build_ArgListLabelFrame(LDA_labelFrame, 'Scoring')
+LDA_crossValidFold = build_ArgListLabelFrame(LDA_labelFrame, 'Cross-Validation Fold')
+LDA_hyperParams = build_ArgListLabelFrame(LDA_labelFrame, 'HyperParameters')
+LDA_results = build_ArgListLabelFrame(LDA_labelFrame, 'Result')
+
+LDA_method.grid(row=0, column=0, columnspan=3, padx=5, pady=2, sticky=NSEW)
+LDA_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
+LDA_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
+LDA_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+LDA_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+
+LDAVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+LDA_method.grid_columnconfigure(0, weight=1)
+LDA_method_dropdown=CTkOptionMenu(
+        master=LDA_method, 
+        values=METHOD_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=LDAVar_method,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LDA_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LDAVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+LDA_scoring.grid_columnconfigure(0, weight=1)
+LDA_scoring_dropdown=CTkOptionMenu(
+        master=LDA_scoring, 
+        values=SCORING_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=LDAVar_scoring,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LDA_scoring_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LDAVar_cross_valid_folds=tk.IntVar(value=3)
+LDA_crossValidFold_rangeEntry = MyIntegerEntry(parent=LDA_crossValidFold, min_value=3, max_value=20, my_font=my_font1, tkVar=LDAVar_cross_valid_folds)
+LDA_crossValidFold_rangeEntry.grid(row=0, column=0, padx=10, pady=5)
+
+LDA_hyperParams.grid_columnconfigure((0,1), weight=1)
+
+LDAVar_solver_options=['svd', 'lsqr', 'eigen']
+LDAVar_solver=StringVar(value=','.join(LDAVar_solver_options))
+LDA_solver = build_ArgListLabelFrame(LDA_hyperParams, 'solver')
+LDA_solver.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+LDA_solver_entry= MultiSelectEntry(
+    parent=LDA_solver,
+    whatToChoosePlural='solver(s)',
+    my_font=my_font1,
+    tkVar=LDAVar_solver,
+    MIN_CHOOSE=2,
+    options=LDAVar_solver_options
+)
+LDA_solver_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LDA_submitBtn = CTkButton(
+    master=LDA_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=300,
+    border_spacing=0,
+    command=lambda: print('Submit')
+)
+LDA_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+
+LDA_results.grid_columnconfigure(0, weight=1)
+LDA_resultsVar = StringVar(value="...")
+LDA_resultTextBox = SyncableTextBox(
+    master=LDA_results,
+    text_variable=LDA_resultsVar,
+    my_font=my_font1
+)
+LDA_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[3]]=LDA_labelFrame
+
 
 def show_hyperParamOptim_AlgoLabelFrame(option):
     for frame in hp_optim_algo_frames.values():
