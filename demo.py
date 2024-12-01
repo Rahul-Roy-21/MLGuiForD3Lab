@@ -2,6 +2,7 @@ from customtkinter import *
 import tkinter as tk
 from PIL import Image
 from my_utils import *
+from my_util_functions import *
 
 set_appearance_mode('light')
 
@@ -11,7 +12,8 @@ root.grid_columnconfigure(tuple(range(1,8)), weight=1) # 8 columns
 root.grid_rowconfigure(tuple(range(2,11)),weight=1) # Only Side_panel and task_panel will expand
 
 # FONTS
-my_font1 = CTkFont(family='annai mn', size=11, weight='bold')
+my_font1 = CTkFont(family='annai mn', size=12, weight='normal')
+RESULTS_LOADING_IMG_PATH = getImgPath('loading.gif')
 
 dataset_frame = CTkFrame(master=root, fg_color=COLORS['SKYBLUE_FG'])
 dataset_frame.grid(row=0,column=0,columnspan=8, sticky=EW,padx=5, pady=(7,0)) # Will span the entire width of root=8
@@ -182,7 +184,6 @@ model_build_btn.configure(command=lambda: show_frame(panelList, btnList, model_b
 show_frame(panelList, [], default_panel, None)
 
 
-
 # FEATURE/ALGORITHM SELECTION FRAME (IN a TASK_PANEL)
 class FeatureSelectionDialog(CTkToplevel):
     def __init__(self, parent, options, selected_feature_tkStringVar: tk.StringVar):
@@ -346,6 +347,7 @@ RF_scoring = build_ArgListLabelFrame(RF_labelFrame, 'Scoring')
 RF_crossValidFold = build_ArgListLabelFrame(RF_labelFrame, 'Cross-Validation Fold')
 RF_hyperParams = build_ArgListLabelFrame(RF_labelFrame, 'HyperParameters')
 RF_results = build_ArgListLabelFrame(RF_labelFrame, 'Result')
+RF_labelFrame.grid_rowconfigure(2, weight=1)
 
 RF_method.grid(row=0, column=0, columnspan=3, padx=5, pady=2, sticky=NSEW)
 RF_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
@@ -458,6 +460,17 @@ RF_minSamplesLeaf_entry = MyRangeEntry(
 )
 RF_minSamplesLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
+RF_inputs = {
+    'METHOD': RFVar_method,
+    'SCORING': RFVar_scoring,
+    'CROSS_FOLD_VALID': RFVar_cross_valid_folds,
+    'N_ESTIMATORS': RFVar_n_estimators,
+    'CRITERIONS': RFVar_criterions,
+    'MAX_DEPTH': RFVar_max_depth,
+    'MIN_SAMPLE_SPLIT': RFVar_min_samples_split,
+    'MIN_SAMPLE_LEAF': RFVar_min_samples_leaf
+}
+
 RF_submitBtn = CTkButton(
     master=RF_hyperParams,
     text='Submit',
@@ -468,11 +481,12 @@ RF_submitBtn = CTkButton(
     corner_radius=0,
     width=300,
     border_spacing=0,
-    command=lambda: print('Submit')
+    command=lambda: RF_HP_OPTIM_SUBMIT(root, RESULTS_LOADING_IMG_PATH, RF_inputs, RF_resultsVar)
 )
 RF_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
 RF_results.grid_columnconfigure(0, weight=1)
+RF_results.grid_rowconfigure(0, weight=1)
 RF_resultsVar = StringVar(value="...")
 RF_resultTextBox = SyncableTextBox(
     master=RF_results,
@@ -498,6 +512,7 @@ SVM_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
 SVM_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
 SVM_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 SVM_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+SVM_labelFrame.grid_rowconfigure(2, weight=1)
 
 SVMVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
 SVM_method.grid_columnconfigure(0, weight=1)
@@ -592,6 +607,7 @@ SVM_submitBtn = CTkButton(
 SVM_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
 SVM_results.grid_columnconfigure(0, weight=1)
+SVM_results.grid_rowconfigure(0, weight=1)
 SVM_resultsVar = StringVar(value="...")
 SVM_resultTextBox = SyncableTextBox(
     master=SVM_results,
@@ -617,6 +633,7 @@ LR_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
 LR_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
 LR_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 LR_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+LR_labelFrame.grid_rowconfigure(2, weight=1)
 
 LRVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
 LR_method.grid_columnconfigure(0, weight=1)
@@ -711,6 +728,7 @@ LR_submitBtn = CTkButton(
 LR_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
 LR_results.grid_columnconfigure(0, weight=1)
+LR_results.grid_rowconfigure(0, weight=1)
 LR_resultsVar = StringVar(value="...")
 LR_resultTextBox = SyncableTextBox(
     master=LR_results,
@@ -736,6 +754,7 @@ LDA_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
 LDA_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
 LDA_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 LDA_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+LDA_labelFrame.grid_rowconfigure(2, weight=1)
 
 LDAVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
 LDA_method.grid_columnconfigure(0, weight=1)
@@ -802,6 +821,7 @@ LDA_submitBtn = CTkButton(
 LDA_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
 LDA_results.grid_columnconfigure(0, weight=1)
+LDA_results.grid_rowconfigure(0, weight=1)
 LDA_resultsVar = StringVar(value="...")
 LDA_resultTextBox = SyncableTextBox(
     master=LDA_results,
@@ -827,6 +847,7 @@ KNN_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
 KNN_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
 KNN_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 KNN_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+KNN_labelFrame.grid_rowconfigure(2, weight=1)
 
 KNNVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
 KNN_method.grid_columnconfigure(0, weight=1)
@@ -919,6 +940,7 @@ KNN_submitBtn = CTkButton(
 KNN_submitBtn.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
 
 KNN_results.grid_columnconfigure(0, weight=1)
+KNN_results.grid_rowconfigure(0, weight=1)
 KNN_resultsVar = StringVar(value="...")
 KNN_resultTextBox = SyncableTextBox(
     master=KNN_results,
@@ -943,6 +965,7 @@ GRB_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
 GRB_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
 GRB_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 GRB_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+GRB_labelFrame.grid_rowconfigure(2, weight=1)
 
 GRBVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
 GRB_method.grid_columnconfigure(0, weight=1)
@@ -1077,6 +1100,7 @@ GRB_submitBtn = CTkButton(
 GRB_submitBtn.grid(row=3, column=0, columnspan=6, padx=10, pady=10)
 
 GRB_results.grid_columnconfigure(0, weight=1)
+GRB_results.grid_rowconfigure(0, weight=1)
 GRB_resultsVar = StringVar(value="...")
 GRB_resultTextBox = SyncableTextBox(
     master=GRB_results,
@@ -1101,6 +1125,7 @@ MLP_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
 MLP_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
 MLP_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 MLP_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+MLP_labelFrame.grid_rowconfigure(2, weight=1)
 
 MLPVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
 MLP_method.grid_columnconfigure(0, weight=1)
@@ -1223,6 +1248,7 @@ MLP_submitBtn = CTkButton(
 MLP_submitBtn.grid(row=3, column=0, columnspan=6, padx=10, pady=10)
 
 MLP_results.grid_columnconfigure(0, weight=1)
+MLP_results.grid_rowconfigure(0, weight=1)
 MLP_resultsVar = StringVar(value="...")
 MLP_resultTextBox = SyncableTextBox(
     master=MLP_results,
@@ -1232,8 +1258,6 @@ MLP_resultTextBox = SyncableTextBox(
 MLP_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
 
 hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[6]]=MLP_labelFrame
-
-
 
 
 def show_hyperParamOptim_AlgoLabelFrame(option):

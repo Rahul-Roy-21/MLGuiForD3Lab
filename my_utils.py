@@ -1,5 +1,5 @@
 from customtkinter import *
-from PIL import Image
+from PIL import Image, ImageSequence
 from os import path as os_path
 
 # COLORS
@@ -8,7 +8,8 @@ COLORS={
     'MEDIUMGREEN_HOVER_FG':'#319941',
     'LIGHTRED_FG':'#c94259',
     'LIGHTRED_HOVER_FG':'#d9596e',
-    'SKYBLUE_FG':'#99e6ff',
+    #'SKYBLUE_FG':'#99e6ff',
+    'SKYBLUE_FG':'#e8e3fa',
     'GREY_HOVER_FG':'#a3a2a3',
     'GREY_FG':'#6b6a6b',
     'LIGHT_YELLOW_FG':'#fff1cc'
@@ -308,7 +309,6 @@ class MyFloatingLogRangeEntry(CTkFrame):
         if from_value >= to_value:
             self.from_var.set(to_value / 10)
 
-
 class MyStepRangeEntry(MyRangeEntry):
     def __init__(self, parent:CTkFrame,
             from_var:IntVar, to_var:IntVar, step_var:IntVar, 
@@ -466,7 +466,7 @@ class SyncableTextBox(CTkTextbox):
         :param master: The parent widget.
         :param text_variable: A StringVar to synchronize with the textbox content.
         """
-        super().__init__(master, height=100, font=my_font, fg_color=COLORS["LIGHT_YELLOW_FG"] ,**kwargs)
+        super().__init__(master, font=my_font, fg_color=COLORS["LIGHT_YELLOW_FG"] ,**kwargs)
         self.text_variable = text_variable
 
         # Bind the StringVar to update the textbox when it changes
@@ -491,3 +491,46 @@ class SyncableTextBox(CTkTextbox):
     def _update_stringvar(self, event=None):
         """Update the StringVar when the content of the textbox changes."""
         self.text_variable.set(self.get("1.0", "end-1c"))
+
+class InProgressWindow:
+    def __init__(self, parent, gif_path: str):
+        self.parent = parent
+        self.progress_window = None
+        self.gif_label = None
+        self.gif_path = gif_path
+    
+    def create(self):
+        # Only create the progress window if it doesn't already exist
+        if not self.is_active():
+            self.progress_window = CTkToplevel(self.parent, fg_color='white')  # Directly reference root
+            self.progress_window.geometry("200x200")
+            self.progress_window.title("Fetching..")
+
+            # Label to display the GIF
+            self.gif_label = CTkLabel(
+                self.progress_window, 
+                text="Fetching Results ...", 
+                compound=TOP,
+                text_color=COLORS["MEDIUMGREEN_FG"]
+            )
+            self.gif_label.pack(pady=20)
+
+            # Load and play GIF using CTkImage
+            gif_image = Image.open(self.gif_path)
+            frames = [CTkImage(frame.copy(), size=(100, 100)) for frame in ImageSequence.Iterator(gif_image)]
+
+            def play_gif(frame=0):
+                self.gif_label.configure(image=frames[frame])
+                frame = (frame + 1) % len(frames)  # Loop the GIF
+                self.progress_window.after(100, lambda: play_gif(frame))
+
+            play_gif()  # Start the GIF animation
+
+    def destroy(self):
+        # Only destroy the progress window if it exists
+        if self.is_active():
+            self.progress_window.destroy()
+
+    def is_active(self):
+        # Check if the progress window is currently displayed
+        return self.progress_window and self.progress_window.winfo_exists()
