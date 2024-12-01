@@ -929,6 +929,167 @@ KNN_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
 
 hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[4]]=KNN_labelFrame
 
+# Gradient Boosting
+GRB_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[0])
+GRB_labelFrame.grid_columnconfigure(tuple(range(6)), weight=1)
+GRB_method = build_ArgListLabelFrame(GRB_labelFrame, 'Method')
+GRB_scoring = build_ArgListLabelFrame(GRB_labelFrame, 'Scoring')
+GRB_crossValidFold = build_ArgListLabelFrame(GRB_labelFrame, 'Cross-Validation Fold')
+GRB_hyperParams = build_ArgListLabelFrame(GRB_labelFrame, 'HyperParameters')
+GRB_results = build_ArgListLabelFrame(GRB_labelFrame, 'Result')
+
+GRB_method.grid(row=0, column=0, columnspan=3, padx=5, pady=2, sticky=NSEW)
+GRB_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
+GRB_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
+GRB_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+GRB_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+
+GRBVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+GRB_method.grid_columnconfigure(0, weight=1)
+GRB_method_dropdown=CTkOptionMenu(
+        master=GRB_method, 
+        values=METHOD_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=GRBVar_method,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+GRB_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+
+GRBVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+GRB_scoring.grid_columnconfigure(0, weight=1)
+GRB_scoring_dropdown=CTkOptionMenu(
+        master=GRB_scoring, 
+        values=SCORING_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=GRBVar_scoring,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+GRB_scoring_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+GRBVar_cross_valid_folds=tk.IntVar(value=3)
+GRB_crossValidFold_rangeEntry = MyIntegerEntry(parent=GRB_crossValidFold, min_value=3, max_value=20, my_font=my_font1, tkVar=GRBVar_cross_valid_folds)
+GRB_crossValidFold_rangeEntry.grid(row=0, column=0, padx=10, pady=5)
+
+GRB_hyperParams.grid_columnconfigure(tuple(range(6)), weight=1)
+
+GRBVar_n_estimators={'_FROM':IntVar(value=10), '_TO':IntVar(value=200), '_STEP':IntVar(value=10)}
+GRB_nEstimators = build_ArgListLabelFrame(GRB_hyperParams, 'n_estimators')
+GRB_nEstimators.grid(row=0, column=0, columnspan=4, padx=10, pady=5, sticky=EW)
+GRB_nEstimators_entry = MyStepRangeEntry(
+    parent=GRB_nEstimators,
+    from_var=GRBVar_n_estimators['_FROM'],
+    to_var=GRBVar_n_estimators['_TO'],
+    step_var=GRBVar_n_estimators['_STEP'],
+    my_font=my_font1,
+    MIN_VAL=GRBVar_n_estimators['_FROM'].get(),
+    MAX_VAL=GRBVar_n_estimators['_TO'].get(),
+    MAX_STEPS=GRBVar_n_estimators['_STEP'].get()
+)
+GRB_nEstimators_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+GRBVar_criterions_options=['friedman_mse', 'squared_error']
+GRBVar_criterions=StringVar(value=','.join(GRBVar_criterions_options))
+GRB_criterions = build_ArgListLabelFrame(GRB_hyperParams, 'criterion')
+GRB_criterions.grid(row=0, column=4, columnspan=2, padx=10, pady=5, sticky=EW)
+GRB_criterions_entry= MultiSelectEntry(
+    parent=GRB_criterions,
+    whatToChoosePlural='Criterions',
+    my_font=my_font1,
+    tkVar=GRBVar_criterions,
+    MIN_CHOOSE=2,
+    options=GRBVar_criterions_options
+)
+GRB_criterions_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+GRBVar_learning_rate={'_FROM':DoubleVar(value=1e-2), '_TO':DoubleVar(value=1e-1)}
+GRB_learning_rate = build_ArgListLabelFrame(GRB_hyperParams, 'learning_rate')
+GRB_learning_rate.grid(row=1, column=0, columnspan=3, padx=10, pady=5, sticky=EW)
+GRB_learning_rate_entry = MyFloatingLogRangeEntry(
+    parent=GRB_learning_rate,
+    from_var=GRBVar_learning_rate['_FROM'],
+    to_var=GRBVar_learning_rate['_TO'],
+    my_font=my_font1,
+    MIN_VAL=1e-3,
+    MAX_VAL=1e0
+)
+GRB_learning_rate_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+GRBVar_max_depth={'_FROM':IntVar(value=2), '_TO':IntVar(value=10)}
+GRB_maxDepth = build_ArgListLabelFrame(GRB_hyperParams, 'max_depth')
+GRB_maxDepth.grid(row=1, column=3, columnspan=3, padx=10, pady=5, sticky=EW)
+GRB_maxDepth_entry = MyRangeEntry(
+    parent=GRB_maxDepth,
+    from_var=GRBVar_max_depth['_FROM'],
+    to_var=GRBVar_max_depth['_TO'],
+    my_font=my_font1,
+    MIN_VAL=GRBVar_max_depth['_FROM'].get(),
+    MAX_VAL=32
+)
+GRB_maxDepth_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+GRBVar_min_samples_split={'_FROM':IntVar(value=2), '_TO':IntVar(value=5)}
+GRB_minSamplesSplit = build_ArgListLabelFrame(GRB_hyperParams, 'min_sample_split')
+GRB_minSamplesSplit.grid(row=2, column=0, columnspan=3, padx=10, pady=5, sticky=EW)
+GRB_minSamplesSplit_entry = MyRangeEntry(
+    parent=GRB_minSamplesSplit,
+    from_var=GRBVar_min_samples_split['_FROM'],
+    to_var=GRBVar_min_samples_split['_TO'],
+    my_font=my_font1,
+    MIN_VAL=GRBVar_min_samples_split['_FROM'].get(),
+    MAX_VAL=10
+)
+GRB_minSamplesSplit_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+GRBVar_min_samples_leaf={'_FROM':IntVar(value=1), '_TO':IntVar(value=5)}
+GRB_minSamplesLeaf = build_ArgListLabelFrame(GRB_hyperParams, 'min_sample_leaf')
+GRB_minSamplesLeaf.grid(row=2, column=3, columnspan=3, padx=10, pady=5, sticky=EW)
+GRB_minSamplesLeaf_entry = MyRangeEntry(
+    parent=GRB_minSamplesLeaf,
+    from_var=GRBVar_min_samples_leaf['_FROM'],
+    to_var=GRBVar_min_samples_leaf['_TO'],
+    my_font=my_font1,
+    MIN_VAL=GRBVar_min_samples_leaf['_FROM'].get(),
+    MAX_VAL=10
+)
+GRB_minSamplesLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+GRB_submitBtn = CTkButton(
+    master=GRB_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=300,
+    border_spacing=0,
+    command=lambda: print('Submit')
+)
+GRB_submitBtn.grid(row=3, column=0, columnspan=6, padx=10, pady=10)
+
+GRB_results.grid_columnconfigure(0, weight=1)
+GRB_resultsVar = StringVar(value="...")
+GRB_resultTextBox = SyncableTextBox(
+    master=GRB_results,
+    text_variable=GRB_resultsVar,
+    my_font=my_font1
+)
+GRB_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[5]]=GRB_labelFrame
+
+
+
+
 
 
 def show_hyperParamOptim_AlgoLabelFrame(option):

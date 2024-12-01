@@ -123,6 +123,96 @@ class MyIntegerEntry(CTkFrame):
             self.after_cancel(self.hold_job)
             self.hold_job = None
 
+class MyFloatingLogEntry(CTkFrame):
+    def __init__(self, parent: CTkFrame, my_font: CTkFont, tkVar: DoubleVar, min_value=1e-5, max_value=1e5):
+        super().__init__(parent)
+        parent.grid_columnconfigure(0, weight=1)
+
+        self.grid(row=0, column=0)
+        self.grid_columnconfigure(1, weight=1)
+        self.configure(fg_color=COLORS["SKYBLUE_FG"])
+
+        self.min_value = min_value
+        self.max_value = max_value
+        self.current_value = tkVar
+        self.hold_job = None  # To track repeating commands
+
+        # Bind a trace to update the display value
+        self.current_value.trace_add("write", self.update_display)
+
+        # Load images for buttons
+        self.minus_image = CTkImage(Image.open(getImgPath("minus.png")), size=(24, 24))
+        self.plus_image = CTkImage(Image.open(getImgPath("add.png")), size=(24, 24))
+
+        # Decrement button
+        self.decrement_button = CTkButton(
+            self, image=self.minus_image, text="",
+            fg_color=COLORS["SKYBLUE_FG"],
+            hover_color=COLORS["LIGHTRED_HOVER_FG"],
+            command=self.decrement, width=20
+        )
+        self.decrement_button.grid(row=0, column=0)
+        self.decrement_button.bind("<ButtonPress-1>", lambda event: self.start_repeat(self.decrement))
+        self.decrement_button.bind("<ButtonRelease-1>", self.stop_repeat)
+
+        # Value label
+        self.value_label = CTkEntry(
+            self, font=my_font, border_width=0, justify=CENTER,
+            fg_color="white", text_color="black", state='readonly', width=80
+        )
+        self.value_label.grid(row=0, column=1)
+
+        # Increment button
+        self.increment_button = CTkButton(
+            self, image=self.plus_image, text="",
+            fg_color=COLORS["SKYBLUE_FG"],
+            hover_color=COLORS["MEDIUMGREEN_HOVER_FG"],
+            command=self.increment, width=20
+        )
+        self.increment_button.grid(row=0, column=2)
+        self.increment_button.bind("<ButtonPress-1>", lambda event: self.start_repeat(self.increment))
+        self.increment_button.bind("<ButtonRelease-1>", self.stop_repeat)
+
+        # Initialize the display
+        self.update_display()
+
+    def update_display(self, *args):
+        """Update the entry field with the formatted value."""
+        value = self.current_value.get()
+        formatted_value = f"{value:.6f}".rstrip("0").rstrip(".")
+        self.value_label.configure(state="normal")  # Temporarily enable editing
+        self.value_label.delete(0, "end")
+        self.value_label.insert(0, formatted_value)
+        self.value_label.configure(state="readonly")  # Revert to readonly
+
+    def increment(self):
+        """Multiply the current value by 10, ensuring it doesn't exceed max_value."""
+        new_value = self.current_value.get() * 10
+        if new_value <= self.max_value:
+            self.current_value.set(new_value)
+
+    def decrement(self):
+        """Divide the current value by 10, ensuring it doesn't go below min_value."""
+        new_value = self.current_value.get() / 10
+        if new_value >= self.min_value:
+            self.current_value.set(new_value)
+
+    def start_repeat(self, command):
+        """Start repeating the given command."""
+        if self.hold_job is None:
+            self.hold_job = self.after(100, lambda: self.repeat_command(command))
+
+    def repeat_command(self, command):
+        """Repeat the command while the button is held."""
+        command()
+        self.hold_job = self.after(100, lambda: self.repeat_command(command))
+
+    def stop_repeat(self, event):
+        """Stop repeating the command when the button is released."""
+        if self.hold_job is not None:
+            self.after_cancel(self.hold_job)
+            self.hold_job = None
+
 class MyRangeEntry(CTkFrame):
     def __init__(self, parent:CTkFrame,
             from_var:IntVar, to_var:IntVar,
@@ -162,6 +252,46 @@ class MyRangeEntry(CTkFrame):
 
         if to_value == from_value:
             self.from_var.set(to_value-1)
+
+class MyFloatingLogRangeEntry(CTkFrame):
+    def __init__(self, parent:CTkFrame,
+            from_var:DoubleVar, to_var:DoubleVar,
+            my_font:CTkFont, MIN_VAL:float, MAX_VAL:float, **kwargs
+        ):
+        super().__init__(parent, **kwargs)
+        self.configure(fg_color=COLORS["SKYBLUE_FG"])
+
+        # Assign the IntVars to the instance
+        self.from_var = from_var
+        self.to_var = to_var
+
+        # Validation logic
+        self.from_var.trace_add("write", self.sync_to_var)
+        self.to_var.trace_add("write", self.sync_from_var)
+
+        self.label_from = CTkLabel(self, text="From:", font=my_font, fg_color=COLORS["SKYBLUE_FG"])
+        self.label_from.grid(row=0, column=0, padx=2, pady=5, sticky="e")
+        self.entry_from = MyFloatingLogEntry(parent=self, my_font=my_font, tkVar=self.from_var, min_value=MIN_VAL, max_value=MAX_VAL/10)
+        self.entry_from.grid(row=0, column=1, padx=5, pady=5, sticky="w")
+
+        self.label_to = CTkLabel(self, text="To:", font=my_font, fg_color=COLORS["SKYBLUE_FG"])
+        self.label_to.grid(row=0, column=2, padx=2, pady=5, sticky="e")
+        self.entry_to = MyFloatingLogEntry(parent=self, my_font=my_font, tkVar=self.to_var, min_value=MIN_VAL*10, max_value=MAX_VAL)
+        self.entry_to.grid(row=0, column=3, padx=5, pady=5, sticky="w")
+    
+    def sync_to_var(self, *args):
+        from_value = self.from_var.get()
+        to_value = self.to_var.get()
+
+        if from_value == to_value:
+            self.to_var.set(from_value*10)
+
+    def sync_from_var(self, *args):
+        from_value = self.from_var.get()
+        to_value = self.to_var.get()
+
+        if to_value == from_value:
+            self.from_var.set(to_value/10)
 
 class MyStepRangeEntry(MyRangeEntry):
     def __init__(self, parent:CTkFrame,
