@@ -254,16 +254,17 @@ class MyRangeEntry(CTkFrame):
             self.from_var.set(to_value-1)
 
 class MyFloatingLogRangeEntry(CTkFrame):
-    def __init__(self, parent:CTkFrame,
-            from_var:DoubleVar, to_var:DoubleVar,
-            my_font:CTkFont, MIN_VAL:float, MAX_VAL:float, **kwargs
-        ):
+    def __init__(self, parent: CTkFrame,
+                 from_var: DoubleVar, to_var: DoubleVar,
+                 my_font: CTkFont, MIN_VAL: float, MAX_VAL: float, **kwargs):
         super().__init__(parent, **kwargs)
         self.configure(fg_color=COLORS["SKYBLUE_FG"])
 
-        # Assign the IntVars to the instance
+        # Assign the DoubleVars to the instance
         self.from_var = from_var
         self.to_var = to_var
+        self.MIN_VAL = MIN_VAL
+        self.MAX_VAL = MAX_VAL
 
         # Validation logic
         self.from_var.trace_add("write", self.sync_to_var)
@@ -271,27 +272,42 @@ class MyFloatingLogRangeEntry(CTkFrame):
 
         self.label_from = CTkLabel(self, text="From:", font=my_font, fg_color=COLORS["SKYBLUE_FG"])
         self.label_from.grid(row=0, column=0, padx=2, pady=5, sticky="e")
-        self.entry_from = MyFloatingLogEntry(parent=self, my_font=my_font, tkVar=self.from_var, min_value=MIN_VAL, max_value=MAX_VAL/10)
+        self.entry_from = MyFloatingLogEntry(
+            parent=self, my_font=my_font, tkVar=self.from_var,
+            min_value=self.MIN_VAL, max_value=self.MAX_VAL/10
+        )
         self.entry_from.grid(row=0, column=1, padx=5, pady=5, sticky="w")
 
         self.label_to = CTkLabel(self, text="To:", font=my_font, fg_color=COLORS["SKYBLUE_FG"])
         self.label_to.grid(row=0, column=2, padx=2, pady=5, sticky="e")
-        self.entry_to = MyFloatingLogEntry(parent=self, my_font=my_font, tkVar=self.to_var, min_value=MIN_VAL*10, max_value=MAX_VAL)
+        self.entry_to = MyFloatingLogEntry(
+            parent=self, my_font=my_font, tkVar=self.to_var,
+            min_value=self.MIN_VAL*10, max_value=self.MAX_VAL
+        )
         self.entry_to.grid(row=0, column=3, padx=5, pady=5, sticky="w")
-    
+
+    def formatted_value(self, val):
+        """Format a float value for comparison."""
+        return f"{val:.10f}".rstrip("0").rstrip(".")
+
     def sync_to_var(self, *args):
+        """Ensure `to_var` stays greater than `from_var`."""
         from_value = self.from_var.get()
         to_value = self.to_var.get()
 
-        if from_value == to_value:
-            self.to_var.set(from_value*10)
+        # If to_value is less than or equal to from_value, adjust to_value
+        if to_value <= from_value:
+            self.to_var.set(from_value * 10)
 
     def sync_from_var(self, *args):
+        """Ensure `from_var` stays less than `to_var`."""
         from_value = self.from_var.get()
         to_value = self.to_var.get()
 
-        if to_value == from_value:
-            self.from_var.set(to_value/10)
+        # If from_value is greater than or equal to to_value, adjust from_value
+        if from_value >= to_value:
+            self.from_var.set(to_value / 10)
+
 
 class MyStepRangeEntry(MyRangeEntry):
     def __init__(self, parent:CTkFrame,

@@ -604,7 +604,7 @@ hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[1]]=SVM_labelFrame
 
 
 # LR inputs
-LR_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[1])
+LR_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[2])
 LR_labelFrame.grid_columnconfigure(tuple(range(7)), weight=1)
 LR_method = build_ArgListLabelFrame(LR_labelFrame, 'Method')
 LR_scoring = build_ArgListLabelFrame(LR_labelFrame, 'Scoring')
@@ -723,7 +723,7 @@ hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[2]]=LR_labelFrame
 
 
 # LDA Inputs
-LDA_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[1])
+LDA_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[3])
 LDA_labelFrame.grid_columnconfigure(tuple(range(7)), weight=1)
 LDA_method = build_ArgListLabelFrame(LDA_labelFrame, 'Method')
 LDA_scoring = build_ArgListLabelFrame(LDA_labelFrame, 'Scoring')
@@ -814,7 +814,7 @@ hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[3]]=LDA_labelFrame
 
 
 # KNN
-KNN_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[0])
+KNN_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[4])
 KNN_labelFrame.grid_columnconfigure(tuple(range(6)), weight=1)
 KNN_method = build_ArgListLabelFrame(KNN_labelFrame, 'Method')
 KNN_scoring = build_ArgListLabelFrame(KNN_labelFrame, 'Scoring')
@@ -930,7 +930,7 @@ KNN_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
 hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[4]]=KNN_labelFrame
 
 # Gradient Boosting
-GRB_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[0])
+GRB_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[5])
 GRB_labelFrame.grid_columnconfigure(tuple(range(6)), weight=1)
 GRB_method = build_ArgListLabelFrame(GRB_labelFrame, 'Method')
 GRB_scoring = build_ArgListLabelFrame(GRB_labelFrame, 'Scoring')
@@ -983,7 +983,7 @@ GRB_hyperParams.grid_columnconfigure(tuple(range(6)), weight=1)
 
 GRBVar_n_estimators={'_FROM':IntVar(value=10), '_TO':IntVar(value=200), '_STEP':IntVar(value=10)}
 GRB_nEstimators = build_ArgListLabelFrame(GRB_hyperParams, 'n_estimators')
-GRB_nEstimators.grid(row=0, column=0, columnspan=4, padx=10, pady=5, sticky=EW)
+GRB_nEstimators.grid(row=0, column=2, columnspan=4, padx=10, pady=5, sticky=EW)
 GRB_nEstimators_entry = MyStepRangeEntry(
     parent=GRB_nEstimators,
     from_var=GRBVar_n_estimators['_FROM'],
@@ -999,7 +999,7 @@ GRB_nEstimators_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 GRBVar_criterions_options=['friedman_mse', 'squared_error']
 GRBVar_criterions=StringVar(value=','.join(GRBVar_criterions_options))
 GRB_criterions = build_ArgListLabelFrame(GRB_hyperParams, 'criterion')
-GRB_criterions.grid(row=0, column=4, columnspan=2, padx=10, pady=5, sticky=EW)
+GRB_criterions.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
 GRB_criterions_entry= MultiSelectEntry(
     parent=GRB_criterions,
     whatToChoosePlural='Criterions',
@@ -1087,7 +1087,151 @@ GRB_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
 
 hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[5]]=GRB_labelFrame
 
+# MLP (ANN)
+MLP_labelFrame = build_ArgListLabelFrame(hyperparam_optim_panel, HYPER_PARAM_OPTIM_ALGORITHMS[6])
+MLP_labelFrame.grid_columnconfigure(tuple(range(6)), weight=1)
+MLP_method = build_ArgListLabelFrame(MLP_labelFrame, 'Method')
+MLP_scoring = build_ArgListLabelFrame(MLP_labelFrame, 'Scoring')
+MLP_crossValidFold = build_ArgListLabelFrame(MLP_labelFrame, 'Cross-Validation Fold')
+MLP_hyperParams = build_ArgListLabelFrame(MLP_labelFrame, 'HyperParameters')
+MLP_results = build_ArgListLabelFrame(MLP_labelFrame, 'Result')
 
+MLP_method.grid(row=0, column=0, columnspan=3, padx=5, pady=2, sticky=NSEW)
+MLP_scoring.grid(row=0, column=3, columnspan=3, padx=5, pady=2, sticky=NSEW)
+MLP_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
+MLP_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+MLP_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
+
+MLPVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+MLP_method.grid_columnconfigure(0, weight=1)
+MLP_method_dropdown=CTkOptionMenu(
+        master=MLP_method, 
+        values=METHOD_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=MLPVar_method,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+MLP_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+MLPVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+MLP_scoring.grid_columnconfigure(0, weight=1)
+MLP_scoring_dropdown=CTkOptionMenu(
+        master=MLP_scoring, 
+        values=SCORING_OPTIONS,
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=MLPVar_scoring,
+        corner_radius=0,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+MLP_scoring_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+MLPVar_cross_valid_folds=tk.IntVar(value=3)
+MLP_crossValidFold_rangeEntry = MyIntegerEntry(parent=MLP_crossValidFold, min_value=3, max_value=20, my_font=my_font1, tkVar=MLPVar_cross_valid_folds)
+MLP_crossValidFold_rangeEntry.grid(row=0, column=0, padx=10, pady=5)
+
+MLP_hyperParams.grid_columnconfigure(tuple(range(2)), weight=1)
+
+MLPVar_hidden_layer_size={'_FROM':IntVar(value=50), '_TO':IntVar(value=300), '_STEP':IntVar(value=10)}
+MLP_hidden_layer_size = build_ArgListLabelFrame(MLP_hyperParams, 'hidden_layer_size')
+MLP_hidden_layer_size.grid(row=0, column=0, columnspan=2, padx=10, pady=5, sticky=EW)
+MLP_hidden_layer_size_entry = MyStepRangeEntry(
+    parent=MLP_hidden_layer_size,
+    from_var=MLPVar_hidden_layer_size['_FROM'],
+    to_var=MLPVar_hidden_layer_size['_TO'],
+    step_var=MLPVar_hidden_layer_size['_STEP'],
+    my_font=my_font1,
+    MIN_VAL=MLPVar_hidden_layer_size['_FROM'].get(),
+    MAX_VAL=MLPVar_hidden_layer_size['_TO'].get(),
+    MAX_STEPS=MLPVar_hidden_layer_size['_STEP'].get()
+)
+MLP_hidden_layer_size_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+MLPVar_activation_options=['relu', 'tanh', 'logistic']
+MLPVar_activation=StringVar(value=','.join(MLPVar_activation_options))
+MLP_activation = build_ArgListLabelFrame(MLP_hyperParams, 'activation')
+MLP_activation.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
+MLP_activation_entry= MultiSelectEntry(
+    parent=MLP_activation,
+    whatToChoosePlural='Activation(s)',
+    my_font=my_font1,
+    tkVar=MLPVar_activation,
+    MIN_CHOOSE=2,
+    options=MLPVar_activation_options
+)
+MLP_activation_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+MLPVar_alpha={'_FROM':DoubleVar(value=1e-6), '_TO':DoubleVar(value=1e-1)}
+MLP_alpha = build_ArgListLabelFrame(MLP_hyperParams, 'alpha')
+MLP_alpha.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
+MLP_alpha_entry = MyFloatingLogRangeEntry(
+    parent=MLP_alpha,
+    from_var=MLPVar_alpha['_FROM'],
+    to_var=MLPVar_alpha['_TO'],
+    my_font=my_font1,
+    MIN_VAL=1e-6,
+    MAX_VAL=1e-1
+)
+MLP_alpha_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+MLPVar_learning_rate_options=['adaptive', 'constant', 'invscaling']
+MLPVar_learning_rate=StringVar(value=','.join(MLPVar_learning_rate_options[:2]))
+MLP_learning_rate = build_ArgListLabelFrame(MLP_hyperParams, 'learning_rate')
+MLP_learning_rate.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
+MLP_learning_rate_entry= MultiSelectEntry(
+    parent=MLP_learning_rate,
+    whatToChoosePlural='Learning Rate(s)',
+    my_font=my_font1,
+    tkVar=MLPVar_learning_rate,
+    MIN_CHOOSE=2,
+    options=MLPVar_learning_rate_options
+)
+MLP_learning_rate_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+MLPVar_solver_options=['adam', 'sgd', 'lbfgs']
+MLPVar_solver=StringVar(value=','.join(MLPVar_solver_options))
+MLP_solver = build_ArgListLabelFrame(MLP_hyperParams, 'solver')
+MLP_solver.grid(row=2, column=1, padx=10, pady=5, sticky=EW)
+MLP_solver_entry= MultiSelectEntry(
+    parent=MLP_solver,
+    whatToChoosePlural='Solver(s)',
+    my_font=my_font1,
+    tkVar=MLPVar_solver,
+    MIN_CHOOSE=2,
+    options=MLPVar_solver_options
+)
+MLP_solver_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+MLP_submitBtn = CTkButton(
+    master=MLP_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=300,
+    border_spacing=0,
+    command=lambda: print('Submit')
+)
+MLP_submitBtn.grid(row=3, column=0, columnspan=6, padx=10, pady=10)
+
+MLP_results.grid_columnconfigure(0, weight=1)
+MLP_resultsVar = StringVar(value="...")
+MLP_resultTextBox = SyncableTextBox(
+    master=MLP_results,
+    text_variable=MLP_resultsVar,
+    my_font=my_font1
+)
+MLP_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+hp_optim_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[6]]=MLP_labelFrame
 
 
 
