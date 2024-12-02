@@ -116,7 +116,7 @@ model_build_img = CTkImage(light_image=Image.open(getImgPath('model_build.png'))
 
 hyperparam_optim_btn=CTkButton(
     master=side_panel,
-    text="HyperParameter\nOptimization", 
+    text="HYPERPARAMETER\nOPTIMIZATION", 
     image=hp_optim_img,
     compound=LEFT,
     font=my_font1,
@@ -127,7 +127,7 @@ hyperparam_optim_btn=CTkButton(
 )
 model_build_btn=CTkButton(
     master=side_panel,
-    text="Model\nBuild", 
+    text="MODEL\nBUILD", 
     image=model_build_img,
     compound=LEFT,
     font=my_font1,
@@ -153,9 +153,8 @@ model_build_panel.grid_columnconfigure(0,weight=1)
 default_panel.grid_columnconfigure(0,weight=1)
 
 hyperparam_optim_panel.grid_rowconfigure(tuple(range(1,7)), weight=1)
+model_build_panel.grid_rowconfigure(tuple(range(1,7)), weight=1)
 
-model_build_panel_label=CTkLabel(master=model_build_panel,text='model_build')
-model_build_panel_label.grid(row=0,column=0)
 default_panel_label=CTkLabel(master=default_panel,text='default_panel')
 default_panel_label.grid(row=0,column=0)
 
@@ -302,7 +301,7 @@ def build_featureAlgoFrame(
 # INP: masterFrame on which outerFrame will be framed
 # OUT: labelFrame ref.. to be used for inserting ArgLabelFrames
 def build_ArgListLabelFrame (masterFrame: CTkFrame, label_text: str):
-    label_frame = tk.LabelFrame(masterFrame, text=label_text, font=my_font1, labelanchor="nw", background=COLORS['SKYBLUE_FG'])
+    label_frame = tk.LabelFrame(masterFrame, text=label_text, font=my_font1, labelanchor=NW, background=COLORS['SKYBLUE_FG'])
     # FOR TIME BEING
     #label1 = tk.Label(label_frame, text="Label 1:")
     #label1.grid(row=0, column=0, padx=10, pady=5, sticky="w")
@@ -1277,12 +1276,228 @@ show_hyperParamOptim_AlgoLabelFrame(HYPER_PARAM_OPTIM_ALGORITHMS[0])
 # MODEL_BUILD panel
 model_build_selected_features=tk.StringVar()
 model_build_selected_algorithm=tk.StringVar()
-build_featureAlgoFrame(
+algo_dropdown = build_featureAlgoFrame(
     masterFrame=model_build_panel,
-    listOfAlgorithms=['algo21','algo22','algo23'],
+    listOfAlgorithms=HYPER_PARAM_OPTIM_ALGORITHMS,
     listOfFeatures=['f21','f22','f23'],
     selected_features=model_build_selected_features,
     selected_algorithm=model_build_selected_algorithm
 )
+
+# Frames for different algo.. set up show_frame
+model_build_algo_frames = {}
+for algo in HYPER_PARAM_OPTIM_ALGORITHMS:
+    # FOR TIME BEING
+    model_build_algo_frames[algo]=build_ArgListLabelFrame(model_build_panel, algo)
+
+RFmb_labelFrame = build_ArgListLabelFrame(model_build_panel, HYPER_PARAM_OPTIM_ALGORITHMS[0])
+RFmb_labelFrame.grid_columnconfigure(0, weight=1)
+RFmb_hyperParams = build_ArgListLabelFrame(RFmb_labelFrame, 'HyperParameters')
+RFmb_results = build_ArgListLabelFrame(RFmb_labelFrame, 'Result')
+RFmb_labelFrame.grid_rowconfigure(1, weight=1)
+
+RFmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
+RFmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
+RFmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
+
+RFmbVar_nEstimators=tk.IntVar(value=100)
+RFmb_nEstimators = build_ArgListLabelFrame(RFmb_hyperParams, 'n_estimators')
+RFmb_nEstimators.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+RFmb_nEstimators.grid_columnconfigure(0, weight=1)
+RFmb_nEstimators_entry=CTkEntry(
+        master=RFmb_nEstimators, 
+        font=my_font1,
+        textvariable=RFmbVar_nEstimators,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+RFmb_nEstimators_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_criterion=tk.StringVar(value=RFVar_criterions_options[0])
+RFmb_criterion = build_ArgListLabelFrame(RFmb_hyperParams, 'criterion')
+RFmb_criterion.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
+RFmb_criterion.grid_columnconfigure(0, weight=1)
+RFmb_criterion_entry=CTkOptionMenu(
+        master=RFmb_criterion, 
+        font=my_font1,
+        variable=RFmbVar_criterion,
+        values=RFVar_criterions_options,
+        dropdown_font=my_font1,
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+RFmb_criterion_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_maxDepth=tk.StringVar(value='None')
+RFmb_maxDepth = build_ArgListLabelFrame(RFmb_hyperParams, 'n_estimators')
+RFmb_maxDepth.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
+RFmb_maxDepth.grid_columnconfigure(0, weight=1)
+RFmb_maxDepth_entry=CTkEntry(
+        master=RFmb_maxDepth, 
+        font=my_font1,
+        textvariable=RFmbVar_maxDepth,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+RFmb_maxDepth_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_minSamplesSplit=tk.DoubleVar(value=2)
+RFmb_minSamplesSplit = build_ArgListLabelFrame(RFmb_hyperParams, 'min_sample_split')
+RFmb_minSamplesSplit.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
+RFmb_minSamplesSplit.grid_columnconfigure(0, weight=1)
+RFmb_minSamplesSplit_entry=CTkEntry(
+        master=RFmb_minSamplesSplit, 
+        font=my_font1,
+        textvariable=RFmbVar_minSamplesSplit,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+RFmb_minSamplesSplit_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_minSamplesLeaf=tk.DoubleVar(value=1)
+RFmb_minSamplesLeaf = build_ArgListLabelFrame(RFmb_hyperParams, 'min_sample_leaf')
+RFmb_minSamplesLeaf.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
+RFmb_minSamplesLeaf.grid_columnconfigure(0, weight=1)
+RFmb_minSamplesLeaf_entry=CTkEntry(
+        master=RFmb_minSamplesLeaf, 
+        font=my_font1,
+        textvariable=RFmbVar_minSamplesLeaf,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+RFmb_minSamplesLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_minImpurityDecrease=tk.DoubleVar(value=0.0)
+RFmb_minImpurityDecrease = build_ArgListLabelFrame(RFmb_hyperParams, 'min_impurity_decrease')
+RFmb_minImpurityDecrease.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
+RFmb_minImpurityDecrease.grid_columnconfigure(0, weight=1)
+RFmb_minImpurityDecrease_entry=CTkEntry(
+        master=RFmb_minImpurityDecrease, 
+        font=my_font1,
+        textvariable=RFmbVar_minImpurityDecrease,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+RFmb_minImpurityDecrease_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_randomState=tk.IntVar(value=0)
+RFmb_randomState = build_ArgListLabelFrame(RFmb_hyperParams, 'random_state')
+RFmb_randomState.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
+RFmb_randomState.grid_columnconfigure(0, weight=1)
+RFmb_randomState_entry=CTkEntry(
+        master=RFmb_randomState, 
+        font=my_font1,
+        textvariable=RFmbVar_randomState,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+RFmb_randomState_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_warmStart=tk.StringVar(value='False')
+RFmb_warmStart = build_ArgListLabelFrame(RFmb_hyperParams, 'warm_start')
+RFmb_warmStart.grid(row=1, column=2, padx=10, pady=5, sticky=EW)
+RFmb_warmStart.grid_columnconfigure(0, weight=1)
+RFmb_warmStart_entry=CTkOptionMenu(
+        master=RFmb_warmStart, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=RFmbVar_warmStart,
+        values=['True', 'False'],
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+RFmb_warmStart_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_maxFeatures=tk.StringVar(value='sqrt')
+RFmb_maxFeatures = build_ArgListLabelFrame(RFmb_hyperParams, 'max_features')
+RFmb_maxFeatures.grid(row=1, column=3, padx=10, pady=5, sticky=EW)
+RFmb_maxFeatures.grid_columnconfigure(0, weight=1)
+RFmb_maxFeatures_entry=CTkEntry(
+        master=RFmb_maxFeatures, 
+        font=my_font1,
+        textvariable=RFmbVar_maxFeatures,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+RFmb_maxFeatures_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_minWeightFractionLeaf=tk.DoubleVar(value=0.0)
+RFmb_minWeightFractionLeaf = build_ArgListLabelFrame(RFmb_hyperParams, 'min_impurity_decrease')
+RFmb_minWeightFractionLeaf.grid(row=1, column=4, padx=10, pady=5, sticky=EW)
+RFmb_minWeightFractionLeaf.grid_columnconfigure(0, weight=1)
+RFmb_minWeightFractionLeaf_entry=CTkEntry(
+        master=RFmb_minWeightFractionLeaf, 
+        font=my_font1,
+        textvariable=RFmbVar_minWeightFractionLeaf,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+RFmb_minWeightFractionLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmbVar_maxLeafNodes=tk.StringVar(value='None')
+RFmb_maxLeafNodes = build_ArgListLabelFrame(RFmb_hyperParams, 'max_leaf_nodes')
+RFmb_maxLeafNodes.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
+RFmb_maxLeafNodes.grid_columnconfigure(0, weight=1)
+RFmb_maxLeafNodes_entry=CTkEntry(
+        master=RFmb_maxLeafNodes, 
+        font=my_font1,
+        textvariable=RFmbVar_maxLeafNodes,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+RFmb_maxLeafNodes_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+RFmb_submitBtn = CTkButton(
+    master=RFmb_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=200,
+    border_spacing=0,
+    command=lambda: print('SUBMIT 1 !!')
+)
+RFmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
+
+RFmb_results.grid_columnconfigure(0, weight=1)
+RFmb_results.grid_rowconfigure(0, weight=1)
+RFmb_resultsVar = StringVar(value="...")
+RFmb_resultTextBox = SyncableTextBox(
+    master=RFmb_results,
+    text_variable=RFmb_resultsVar,
+    my_font=my_font1
+)
+RFmb_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+model_build_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[0]] = RFmb_labelFrame
+
+def show_modelBuild_AlgoLabelFrame(option):
+    for frame in model_build_algo_frames.values():
+        frame.grid_remove()
+    model_build_algo_frames[option].grid(row=1,column=0,rowspan=6, columnspan=7,sticky=NSEW,padx=8,pady=(2,5))
+    model_build_algo_frames[option].grid_columnconfigure(tuple(range(7)), weight=1)
+
+algo_dropdown.configure(command=show_modelBuild_AlgoLabelFrame)
+
+# Setting Default model_build_selected_algorithm to index 0 and also displaying that frame (as set doesn't trigger command)
+model_build_selected_algorithm.set(HYPER_PARAM_OPTIM_ALGORITHMS[0])
+show_modelBuild_AlgoLabelFrame(HYPER_PARAM_OPTIM_ALGORITHMS[0])
 
 root.mainloop()
