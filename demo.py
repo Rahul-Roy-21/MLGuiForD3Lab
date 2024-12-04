@@ -1767,7 +1767,7 @@ LDAmb_tol_entry=CTkEntry(
         textvariable=LDAmbVar_tol,
         corner_radius=0,
         border_width=0,
-        width=40
+        width=80
     )
 LDAmb_tol_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
@@ -1814,6 +1814,234 @@ LDAmb_resultTextBox = SyncableTextBox(
 LDAmb_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
 
 model_build_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[3]] = LDAmb_labelFrame
+
+
+LRmb_labelFrame = build_ArgListLabelFrame(model_build_panel, HYPER_PARAM_OPTIM_ALGORITHMS[2])
+LRmb_labelFrame.grid_columnconfigure(0, weight=1)
+LRmb_hyperParams = build_ArgListLabelFrame(LRmb_labelFrame, 'HyperParameters')
+LRmb_results = build_ArgListLabelFrame(LRmb_labelFrame, 'Result')
+LRmb_labelFrame.grid_rowconfigure(1, weight=1)
+
+LRmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
+LRmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
+LRmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
+
+LRmbVar_l1_ratio=tk.StringVar(value='None')
+LRmb_l1_ratio = build_ArgListLabelFrame(LRmb_hyperParams, 'l1_ratio')
+LRmb_l1_ratio.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+LRmb_l1_ratio.grid_columnconfigure(0, weight=1)
+LRmb_l1_ratio_entry=CTkEntry(
+        master=LRmb_l1_ratio, 
+        font=my_font1,
+        textvariable=LRmbVar_l1_ratio,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LRmb_l1_ratio_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_penalty=tk.StringVar(value=LRVar_penalty_options[1])
+LRmb_penalty = build_ArgListLabelFrame(LRmb_hyperParams, 'penalty')
+LRmb_penalty.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
+LRmb_penalty.grid_columnconfigure(0, weight=1)
+LRmb_penalty_entry=CTkOptionMenu(
+        master=LRmb_penalty, 
+        font=my_font1,
+        variable=LRmbVar_penalty,
+        values=LRVar_penalty_options,
+        dropdown_font=my_font1,
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LRmb_penalty_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_tol=tk.DoubleVar(value=0.0001)
+LRmb_tol = build_ArgListLabelFrame(LRmb_hyperParams, 'tol')
+LRmb_tol.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
+LRmb_tol.grid_columnconfigure(0, weight=1)
+LRmb_tol_entry=CTkEntry(
+        master=LRmb_tol, 
+        font=my_font1,
+        textvariable=LRmbVar_tol,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LRmb_tol_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_C_field=tk.DoubleVar(value=1.0)
+LRmb_C_field = build_ArgListLabelFrame(LRmb_hyperParams, 'C')
+LRmb_C_field.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
+LRmb_C_field.grid_columnconfigure(0, weight=1)
+LRmb_C_field_entry=CTkEntry(
+        master=LRmb_C_field, 
+        font=my_font1,
+        textvariable=LRmbVar_C_field,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LRmb_C_field_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_fit_intercept=tk.StringVar(value='True')
+LRmb_fit_intercept = build_ArgListLabelFrame(LRmb_hyperParams, 'fit_intercept')
+LRmb_fit_intercept.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
+LRmb_fit_intercept.grid_columnconfigure(0, weight=1)
+LRmb_fit_intercept_entry=CTkOptionMenu(
+        master=LRmb_fit_intercept, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=LRmbVar_fit_intercept,
+        values=['True', 'False'],
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LRmb_fit_intercept_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_intercept_scaling=tk.DoubleVar(value=1.0)
+LRmb_intercept_scaling = build_ArgListLabelFrame(LRmb_hyperParams, 'intercept_scaling')
+LRmb_intercept_scaling.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
+LRmb_intercept_scaling.grid_columnconfigure(0, weight=1)
+LRmb_intercept_scaling_entry=CTkEntry(
+        master=LRmb_intercept_scaling, 
+        font=my_font1,
+        textvariable=LRmbVar_intercept_scaling,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LRmb_intercept_scaling_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_randomState=tk.StringVar(value='None')
+LRmb_randomState = build_ArgListLabelFrame(LRmb_hyperParams, 'random_state')
+LRmb_randomState.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
+LRmb_randomState.grid_columnconfigure(0, weight=1)
+LRmb_randomState_entry=CTkEntry(
+        master=LRmb_randomState, 
+        font=my_font1,
+        textvariable=LRmbVar_randomState,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LRmb_randomState_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_solver=tk.StringVar(value=LRVar_solver_options[0])
+LRmb_solver = build_ArgListLabelFrame(LRmb_hyperParams, 'solver')
+LRmb_solver.grid(row=1, column=2, padx=10, pady=5, sticky=EW)
+LRmb_solver.grid_columnconfigure(0, weight=1)
+LRmb_solver_entry=CTkOptionMenu(
+        master=LRmb_solver, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=LRmbVar_solver,
+        values=LRVar_solver_options,
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LRmb_solver_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_warmStart=tk.StringVar(value='False')
+LRmb_warmStart = build_ArgListLabelFrame(LRmb_hyperParams, 'warm_start')
+LRmb_warmStart.grid(row=1, column=3, padx=10, pady=5, sticky=EW)
+LRmb_warmStart.grid_columnconfigure(0, weight=1)
+LRmb_warmStart_entry=CTkOptionMenu(
+        master=LRmb_warmStart, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=LRmbVar_warmStart,
+        values=['True', 'False'],
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LRmb_warmStart_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_max_iter=tk.IntVar(value=100)
+LRmb_max_iter = build_ArgListLabelFrame(LRmb_hyperParams, 'max_iter')
+LRmb_max_iter.grid(row=1, column=4, padx=10, pady=5, sticky=EW)
+LRmb_max_iter.grid_columnconfigure(0, weight=1)
+LRmb_max_iter_entry=CTkEntry(
+        master=LRmb_max_iter, 
+        font=my_font1,
+        textvariable=LRmbVar_max_iter,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LRmb_max_iter_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRVar_multi_class_options = ['auto', 'ovr', 'multinomial']
+LRmbVar_multi_class=tk.StringVar(value=LRVar_multi_class_options[0])
+LRmb_multi_class = build_ArgListLabelFrame(LRmb_hyperParams, 'multi_class')
+LRmb_multi_class.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
+LRmb_multi_class.grid_columnconfigure(0, weight=1)
+LRmb_multi_class_entry=CTkOptionMenu(
+        master=LRmb_multi_class, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=LRmbVar_multi_class,
+        values=LRVar_multi_class_options,
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LRmb_multi_class_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmbVar_n_jobs=tk.StringVar(value='None')
+LRmb_n_jobs = build_ArgListLabelFrame(LRmb_hyperParams, 'n_jobs')
+LRmb_n_jobs.grid(row=2, column=1, padx=10, pady=5, sticky=EW)
+LRmb_n_jobs.grid_columnconfigure(0, weight=1)
+LRmb_n_jobs_entry=CTkEntry(
+        master=LRmb_n_jobs, 
+        font=my_font1,
+        textvariable=LRmbVar_n_jobs,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LRmb_n_jobs_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LRmb_submitBtn = CTkButton(
+    master=LRmb_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=200,
+    border_spacing=0,
+    command=lambda: print('SUBMIT LR !!')
+)
+LRmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
+
+LRmb_results.grid_columnconfigure(0, weight=1)
+LRmb_results.grid_rowconfigure(0, weight=1)
+LRmb_resultsVar = StringVar(value="...")
+LRmb_resultTextBox = SyncableTextBox(
+    master=LRmb_results,
+    text_variable=LRmb_resultsVar,
+    my_font=my_font1
+)
+LRmb_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+model_build_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[2]] = LRmb_labelFrame
+
+
 
 
 def show_modelBuild_AlgoLabelFrame(option):
