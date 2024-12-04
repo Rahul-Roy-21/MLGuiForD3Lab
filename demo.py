@@ -12,7 +12,7 @@ root.grid_columnconfigure(tuple(range(1,8)), weight=1) # 8 columns
 root.grid_rowconfigure(tuple(range(2,11)),weight=1) # Only Side_panel and task_panel will expand
 
 # FONTS
-my_font1 = CTkFont(family='annai mn', size=12, weight='normal')
+my_font1 = CTkFont(family='courier prime', size=13, weight='normal')
 RESULTS_LOADING_IMG_PATH = getImgPath('loading.gif')
 
 dataset_frame = CTkFrame(master=root, fg_color=COLORS['SKYBLUE_FG'])
@@ -35,8 +35,7 @@ train_entryVar=tk.StringVar()
 train_entry=CTkEntry(
     master=dataset_frame, 
     textvariable=train_entryVar, 
-    border_width=1,
-    border_color=COLORS['GREY_HOVER_FG'], 
+    border_width=0,
     corner_radius=0,
     font=my_font1
 )
@@ -47,8 +46,7 @@ test_entryVar=tk.StringVar()
 test_entry=CTkEntry(
     master=dataset_frame, 
     textvariable=test_entryVar, 
-    border_width=1,
-    border_color=COLORS['GREY_HOVER_FG'],
+    border_width=0,
     corner_radius=0,
     font=my_font1
 )
@@ -1333,7 +1331,7 @@ RFmb_criterion_entry=CTkOptionMenu(
 RFmb_criterion_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 RFmbVar_maxDepth=tk.StringVar(value='None')
-RFmb_maxDepth = build_ArgListLabelFrame(RFmb_hyperParams, 'n_estimators')
+RFmb_maxDepth = build_ArgListLabelFrame(RFmb_hyperParams, 'max_depth')
 RFmb_maxDepth.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
 RFmb_maxDepth.grid_columnconfigure(0, weight=1)
 RFmb_maxDepth_entry=CTkEntry(
