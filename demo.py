@@ -1486,6 +1486,336 @@ RFmb_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
 
 model_build_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[0]] = RFmb_labelFrame
 
+SVMmb_labelFrame = build_ArgListLabelFrame(model_build_panel, HYPER_PARAM_OPTIM_ALGORITHMS[1])
+SVMmb_labelFrame.grid_columnconfigure(0, weight=1)
+SVMmb_hyperParams = build_ArgListLabelFrame(SVMmb_labelFrame, 'HyperParameters')
+SVMmb_results = build_ArgListLabelFrame(SVMmb_labelFrame, 'Result')
+SVMmb_labelFrame.grid_rowconfigure(1, weight=1)
+
+SVMmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
+SVMmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
+SVMmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
+
+SVMmbVar_C_field=tk.DoubleVar(value=1.0)
+SVMmb_C_field = build_ArgListLabelFrame(SVMmb_hyperParams, 'C')
+SVMmb_C_field.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+SVMmb_C_field.grid_columnconfigure(0, weight=1)
+SVMmb_C_field_entry=CTkEntry(
+        master=SVMmb_C_field, 
+        font=my_font1,
+        textvariable=SVMmbVar_C_field,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+SVMmb_C_field_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmbVar_kernel=tk.StringVar(value='rbf')
+SVMmb_kernel = build_ArgListLabelFrame(SVMmb_hyperParams, 'kernel')
+SVMmb_kernel.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
+SVMmb_kernel.grid_columnconfigure(0, weight=1)
+SVMmb_kernel_entry=CTkOptionMenu(
+        master=SVMmb_kernel, 
+        font=my_font1,
+        variable=SVMmbVar_kernel,
+        values=SVMVar_kernel_options,
+        dropdown_font=my_font1,
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+SVMmb_kernel_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmbVar_degree=tk.IntVar(value=3)
+SVMmb_degree = build_ArgListLabelFrame(SVMmb_hyperParams, 'degree')
+SVMmb_degree.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
+SVMmb_degree.grid_columnconfigure(0, weight=1)
+SVMmb_degree_entry=CTkEntry(
+        master=SVMmb_degree, 
+        font=my_font1,
+        textvariable=SVMmbVar_degree,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+SVMmb_degree_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmbVar_gamma=tk.StringVar(value=SVMVar_gamma_options[0])
+SVMmb_gamma = build_ArgListLabelFrame(SVMmb_hyperParams, 'gamma')
+SVMmb_gamma.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
+SVMmb_gamma.grid_columnconfigure(0, weight=1)
+SVMmb_gamma_entry=CTkOptionMenu(
+        master=SVMmb_gamma, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=SVMmbVar_gamma,
+        values=SVMVar_gamma_options,
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+SVMmb_gamma_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmbVar_coef0=tk.DoubleVar(value=0.0)
+SVMmb_coef0 = build_ArgListLabelFrame(SVMmb_hyperParams, 'coef0')
+SVMmb_coef0.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
+SVMmb_coef0.grid_columnconfigure(0, weight=1)
+SVMmb_coef0_entry=CTkEntry(
+        master=SVMmb_coef0, 
+        font=my_font1,
+        textvariable=SVMmbVar_coef0,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+SVMmb_coef0_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmbVar_tol=tk.DoubleVar(value=0.001)
+SVMmb_tol = build_ArgListLabelFrame(SVMmb_hyperParams, 'tol')
+SVMmb_tol.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
+SVMmb_tol.grid_columnconfigure(0, weight=1)
+SVMmb_tol_entry=CTkEntry(
+        master=SVMmb_tol, 
+        font=my_font1,
+        textvariable=SVMmbVar_tol,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+SVMmb_tol_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmbVar_shrinking=tk.StringVar(value='True')
+SVMmb_shrinking = build_ArgListLabelFrame(SVMmb_hyperParams, 'shrinking')
+SVMmb_shrinking.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
+SVMmb_shrinking.grid_columnconfigure(0, weight=1)
+SVMmb_shrinking_entry=CTkOptionMenu(
+        master=SVMmb_shrinking, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=SVMmbVar_shrinking,
+        values=['True', 'False'],
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+SVMmb_shrinking_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmbVar_probability=tk.StringVar(value='False')
+SVMmb_probability = build_ArgListLabelFrame(SVMmb_hyperParams, 'probability')
+SVMmb_probability.grid(row=1, column=2, padx=10, pady=5, sticky=EW)
+SVMmb_probability.grid_columnconfigure(0, weight=1)
+SVMmb_probability_entry=CTkOptionMenu(
+        master=SVMmb_probability, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=SVMmbVar_probability,
+        values=['True', 'False'],
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+SVMmb_probability_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmbVar_random_state=tk.StringVar(value='None')
+SVMmb_random_state = build_ArgListLabelFrame(SVMmb_hyperParams, 'random_state')
+SVMmb_random_state.grid(row=1, column=3, padx=10, pady=5, sticky=EW)
+SVMmb_random_state.grid_columnconfigure(0, weight=1)
+SVMmb_random_state_entry=CTkEntry(
+        master=SVMmb_random_state, 
+        font=my_font1,
+        textvariable=SVMmbVar_random_state,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+SVMmb_random_state_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMVar_decision_function_shape_options = ['ovr','ovo']
+SVMmbVar_decision_function_shape=tk.StringVar(value=SVMVar_decision_function_shape_options[0])
+SVMmb_decision_function_shape = build_ArgListLabelFrame(SVMmb_hyperParams, 'decision_function_shape')
+SVMmb_decision_function_shape.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
+SVMmb_decision_function_shape.grid_columnconfigure(0, weight=1)
+SVMmb_decision_function_shape_entry=CTkOptionMenu(
+        master=SVMmb_decision_function_shape, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=SVMmbVar_decision_function_shape,
+        values=SVMVar_decision_function_shape_options,
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+SVMmb_decision_function_shape_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmbVar_break_ties=tk.StringVar(value='False')
+SVMmb_break_ties = build_ArgListLabelFrame(SVMmb_hyperParams, 'break_ties')
+SVMmb_break_ties.grid(row=1, column=4, padx=10, pady=5, sticky=EW)
+SVMmb_break_ties.grid_columnconfigure(0, weight=1)
+SVMmb_break_ties_entry=CTkOptionMenu(
+        master=SVMmb_break_ties, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=SVMmbVar_break_ties,
+        values=['True', 'False'],
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+SVMmb_break_ties_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+SVMmb_submitBtn = CTkButton(
+    master=SVMmb_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=200,
+    border_spacing=0,
+    command=lambda: print('SUBMIT SVMmb !!')
+)
+SVMmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
+
+SVMmb_results.grid_columnconfigure(0, weight=1)
+SVMmb_results.grid_rowconfigure(0, weight=1)
+SVMmb_resultsVar = StringVar(value="...")
+SVMmb_resultTextBox = SyncableTextBox(
+    master=SVMmb_results,
+    text_variable=SVMmb_resultsVar,
+    my_font=my_font1
+)
+SVMmb_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+model_build_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[1]] = SVMmb_labelFrame
+
+LDAmb_labelFrame = build_ArgListLabelFrame(model_build_panel, HYPER_PARAM_OPTIM_ALGORITHMS[3])
+LDAmb_labelFrame.grid_columnconfigure(0, weight=1)
+LDAmb_hyperParams = build_ArgListLabelFrame(LDAmb_labelFrame, 'HyperParameters')
+LDAmb_results = build_ArgListLabelFrame(LDAmb_labelFrame, 'Result')
+LDAmb_labelFrame.grid_rowconfigure(1, weight=1)
+
+LDAmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
+LDAmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
+LDAmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
+
+LDAmbVar_solver=tk.StringVar(value=LDAVar_solver_options[0])
+LDAmb_solver = build_ArgListLabelFrame(LDAmb_hyperParams, 'solver')
+LDAmb_solver.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+LDAmb_solver.grid_columnconfigure(0, weight=1)
+LDAmb_solver_entry=CTkOptionMenu(
+        master=LDAmb_solver, 
+        font=my_font1,
+        variable=LDAmbVar_solver,
+        values=LDAVar_solver_options,
+        dropdown_font=my_font1,
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LDAmb_solver_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LDAmbVar_shrinkage=tk.IntVar(value=3)
+LDAmb_shrinkage = build_ArgListLabelFrame(LDAmb_hyperParams, 'shrinkage')
+LDAmb_shrinkage.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
+LDAmb_shrinkage.grid_columnconfigure(0, weight=1)
+LDAmb_shrinkage_entry=CTkEntry(
+        master=LDAmb_shrinkage, 
+        font=my_font1,
+        textvariable=LDAmbVar_shrinkage,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LDAmb_shrinkage_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LDAmbVar_n_components=tk.StringVar(value='None')
+LDAmb_n_components = build_ArgListLabelFrame(LDAmb_hyperParams, 'n_components')
+LDAmb_n_components.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
+LDAmb_n_components.grid_columnconfigure(0, weight=1)
+LDAmb_n_components_entry=CTkEntry(
+        master=LDAmb_n_components, 
+        font=my_font1,
+        textvariable=LDAmbVar_n_components,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LDAmb_n_components_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LDAmbVar_tol=tk.DoubleVar(value=0.001)
+LDAmb_tol = build_ArgListLabelFrame(LDAmb_hyperParams, 'tol')
+LDAmb_tol.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
+LDAmb_tol.grid_columnconfigure(0, weight=1)
+LDAmb_tol_entry=CTkEntry(
+        master=LDAmb_tol, 
+        font=my_font1,
+        textvariable=LDAmbVar_tol,
+        corner_radius=0,
+        border_width=0,
+        width=40
+    )
+LDAmb_tol_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LDAmbVar_store_covariance=tk.StringVar(value='False')
+LDAmb_store_covariance = build_ArgListLabelFrame(LDAmb_hyperParams, 'store_covariance')
+LDAmb_store_covariance.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
+LDAmb_store_covariance.grid_columnconfigure(0, weight=1)
+LDAmb_store_covariance_entry=CTkOptionMenu(
+        master=LDAmb_store_covariance, 
+        font=my_font1,
+        dropdown_font=my_font1,
+        variable=LDAmbVar_store_covariance,
+        values=['True', 'False'],
+        corner_radius=0,
+        anchor=CENTER,
+        button_color=COLORS['GREY_FG'],
+        button_hover_color=COLORS['GREY_FG'],
+        fg_color=COLORS['GREY_FG']
+    )
+LDAmb_store_covariance_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
+
+LDAmb_submitBtn = CTkButton(
+    master=LDAmb_hyperParams,
+    text='Submit',
+    font=my_font1,
+    fg_color=COLORS['MEDIUMGREEN_FG'],
+    hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+    text_color='white',
+    corner_radius=0,
+    width=200,
+    border_spacing=0,
+    command=lambda: print('SUBMIT LDAmb !!')
+)
+LDAmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
+
+LDAmb_results.grid_columnconfigure(0, weight=1)
+LDAmb_results.grid_rowconfigure(0, weight=1)
+LDAmb_resultsVar = StringVar(value="...")
+LDAmb_resultTextBox = SyncableTextBox(
+    master=LDAmb_results,
+    text_variable=LDAmb_resultsVar,
+    my_font=my_font1
+)
+LDAmb_resultTextBox.grid(row=0, column=0, padx=10, pady=5, sticky=NSEW)
+
+model_build_algo_frames[HYPER_PARAM_OPTIM_ALGORITHMS[3]] = LDAmb_labelFrame
+
+
 def show_modelBuild_AlgoLabelFrame(option):
     for frame in model_build_algo_frames.values():
         frame.grid_remove()
