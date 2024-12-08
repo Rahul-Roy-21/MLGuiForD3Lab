@@ -1298,7 +1298,7 @@ RFmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
 RFmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
 RFmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
 
-RFmbVar_nEstimators=tk.IntVar(value=100)
+RFmbVar_nEstimators=tk.StringVar(value='100')
 RFmb_nEstimators = build_ArgListLabelFrame(RFmb_hyperParams, 'n_estimators')
 RFmb_nEstimators.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 RFmb_nEstimators.grid_columnconfigure(0, weight=1)
@@ -1344,7 +1344,7 @@ RFmb_maxDepth_entry=CTkEntry(
     )
 RFmb_maxDepth_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_minSamplesSplit=tk.DoubleVar(value=2)
+RFmbVar_minSamplesSplit=tk.StringVar(value='2')
 RFmb_minSamplesSplit = build_ArgListLabelFrame(RFmb_hyperParams, 'min_sample_split')
 RFmb_minSamplesSplit.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
 RFmb_minSamplesSplit.grid_columnconfigure(0, weight=1)
@@ -1358,7 +1358,7 @@ RFmb_minSamplesSplit_entry=CTkEntry(
     )
 RFmb_minSamplesSplit_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_minSamplesLeaf=tk.DoubleVar(value=1)
+RFmbVar_minSamplesLeaf=tk.StringVar(value='1')
 RFmb_minSamplesLeaf = build_ArgListLabelFrame(RFmb_hyperParams, 'min_sample_leaf')
 RFmb_minSamplesLeaf.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
 RFmb_minSamplesLeaf.grid_columnconfigure(0, weight=1)
@@ -1372,7 +1372,7 @@ RFmb_minSamplesLeaf_entry=CTkEntry(
     )
 RFmb_minSamplesLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_minImpurityDecrease=tk.DoubleVar(value=0.0)
+RFmbVar_minImpurityDecrease=tk.StringVar(value='0.0')
 RFmb_minImpurityDecrease = build_ArgListLabelFrame(RFmb_hyperParams, 'min_impurity_decrease')
 RFmb_minImpurityDecrease.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
 RFmb_minImpurityDecrease.grid_columnconfigure(0, weight=1)
@@ -1386,7 +1386,7 @@ RFmb_minImpurityDecrease_entry=CTkEntry(
     )
 RFmb_minImpurityDecrease_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_randomState=tk.IntVar(value=0)
+RFmbVar_randomState=tk.StringVar(value='None')
 RFmb_randomState = build_ArgListLabelFrame(RFmb_hyperParams, 'random_state')
 RFmb_randomState.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
 RFmb_randomState.grid_columnconfigure(0, weight=1)
@@ -1432,8 +1432,8 @@ RFmb_maxFeatures_entry=CTkEntry(
     )
 RFmb_maxFeatures_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_minWeightFractionLeaf=tk.DoubleVar(value=0.0)
-RFmb_minWeightFractionLeaf = build_ArgListLabelFrame(RFmb_hyperParams, 'min_impurity_decrease')
+RFmbVar_minWeightFractionLeaf=tk.StringVar(value='0.0')
+RFmb_minWeightFractionLeaf = build_ArgListLabelFrame(RFmb_hyperParams, 'min_weight_fraction_leaf')
 RFmb_minWeightFractionLeaf.grid(row=1, column=4, padx=10, pady=5, sticky=EW)
 RFmb_minWeightFractionLeaf.grid_columnconfigure(0, weight=1)
 RFmb_minWeightFractionLeaf_entry=CTkEntry(
@@ -1460,6 +1460,20 @@ RFmb_maxLeafNodes_entry=CTkEntry(
     )
 RFmb_maxLeafNodes_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
+RFmb_inputs = {
+    "N_ESTIMATORS": RFmbVar_nEstimators,
+    "CRITERION": RFmbVar_criterion,
+    "MAX_DEPTH": RFmbVar_maxDepth,
+    "MIN_SAMPLE_SPLIT": RFmbVar_minSamplesSplit,
+    "MIN_SAMPLE_LEAF": RFmbVar_minSamplesLeaf,
+    "MIN_IMPURITY_DECREASE": RFmbVar_minImpurityDecrease,
+    "RANDOM_STATE": RFmbVar_randomState,
+    "WARM_STATE": RFmbVar_warmStart,
+    "MAX_FEATURES": RFmbVar_maxFeatures,
+    "MIN_WEIGHT_FRACTION_LEAF": RFmbVar_minWeightFractionLeaf,
+    "MAX_LEAF_NODES": RFmbVar_maxLeafNodes
+}
+
 RFmb_submitBtn = CTkButton(
     master=RFmb_hyperParams,
     text='Submit',
@@ -1470,7 +1484,7 @@ RFmb_submitBtn = CTkButton(
     corner_radius=0,
     width=200,
     border_spacing=0,
-    command=lambda: print('SUBMIT 1 !!')
+    command=lambda: RF_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, RFmb_inputs, RFmb_resultsVar, my_font1)
 )
 RFmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
 
@@ -1496,7 +1510,7 @@ SVMmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
 SVMmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
 SVMmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
 
-SVMmbVar_C_field=tk.DoubleVar(value=1.0)
+SVMmbVar_C_field=tk.StringVar(value='1.0')
 SVMmb_C_field = build_ArgListLabelFrame(SVMmb_hyperParams, 'C')
 SVMmb_C_field.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 SVMmb_C_field.grid_columnconfigure(0, weight=1)
@@ -1528,7 +1542,7 @@ SVMmb_kernel_entry=CTkOptionMenu(
     )
 SVMmb_kernel_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_degree=tk.IntVar(value=3)
+SVMmbVar_degree=tk.StringVar(value='3')
 SVMmb_degree = build_ArgListLabelFrame(SVMmb_hyperParams, 'degree')
 SVMmb_degree.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
 SVMmb_degree.grid_columnconfigure(0, weight=1)
@@ -1560,7 +1574,7 @@ SVMmb_gamma_entry=CTkOptionMenu(
     )
 SVMmb_gamma_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_coef0=tk.DoubleVar(value=0.0)
+SVMmbVar_coef0=tk.StringVar(value='0.0')
 SVMmb_coef0 = build_ArgListLabelFrame(SVMmb_hyperParams, 'coef0')
 SVMmb_coef0.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
 SVMmb_coef0.grid_columnconfigure(0, weight=1)
@@ -1574,7 +1588,7 @@ SVMmb_coef0_entry=CTkEntry(
     )
 SVMmb_coef0_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_tol=tk.DoubleVar(value=0.001)
+SVMmbVar_tol=tk.StringVar(value='0.001')
 SVMmb_tol = build_ArgListLabelFrame(SVMmb_hyperParams, 'tol')
 SVMmb_tol.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
 SVMmb_tol.grid_columnconfigure(0, weight=1)
@@ -1729,7 +1743,7 @@ LDAmb_solver_entry=CTkOptionMenu(
     )
 LDAmb_solver_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LDAmbVar_shrinkage=tk.IntVar(value=3)
+LDAmbVar_shrinkage=tk.StringVar(value=3)
 LDAmb_shrinkage = build_ArgListLabelFrame(LDAmb_hyperParams, 'shrinkage')
 LDAmb_shrinkage.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
 LDAmb_shrinkage.grid_columnconfigure(0, weight=1)
@@ -1757,7 +1771,7 @@ LDAmb_n_components_entry=CTkEntry(
     )
 LDAmb_n_components_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LDAmbVar_tol=tk.DoubleVar(value=0.001)
+LDAmbVar_tol=tk.StringVar(value='0.001')
 LDAmb_tol = build_ArgListLabelFrame(LDAmb_hyperParams, 'tol')
 LDAmb_tol.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
 LDAmb_tol.grid_columnconfigure(0, weight=1)
@@ -1858,7 +1872,7 @@ LRmb_penalty_entry=CTkOptionMenu(
     )
 LRmb_penalty_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_tol=tk.DoubleVar(value=0.0001)
+LRmbVar_tol=tk.StringVar(value='0.0001')
 LRmb_tol = build_ArgListLabelFrame(LRmb_hyperParams, 'tol')
 LRmb_tol.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
 LRmb_tol.grid_columnconfigure(0, weight=1)
@@ -1872,7 +1886,7 @@ LRmb_tol_entry=CTkEntry(
     )
 LRmb_tol_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_C_field=tk.DoubleVar(value=1.0)
+LRmbVar_C_field=tk.StringVar(value='1.0')
 LRmb_C_field = build_ArgListLabelFrame(LRmb_hyperParams, 'C')
 LRmb_C_field.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
 LRmb_C_field.grid_columnconfigure(0, weight=1)
@@ -1904,7 +1918,7 @@ LRmb_fit_intercept_entry=CTkOptionMenu(
     )
 LRmb_fit_intercept_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_intercept_scaling=tk.DoubleVar(value=1.0)
+LRmbVar_intercept_scaling=tk.StringVar(value='1.0')
 LRmb_intercept_scaling = build_ArgListLabelFrame(LRmb_hyperParams, 'intercept_scaling')
 LRmb_intercept_scaling.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
 LRmb_intercept_scaling.grid_columnconfigure(0, weight=1)
@@ -1968,7 +1982,7 @@ LRmb_warmStart_entry=CTkOptionMenu(
     )
 LRmb_warmStart_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_max_iter=tk.IntVar(value=100)
+LRmbVar_max_iter=tk.StringVar(value='100')
 LRmb_max_iter = build_ArgListLabelFrame(LRmb_hyperParams, 'max_iter')
 LRmb_max_iter.grid(row=1, column=4, padx=10, pady=5, sticky=EW)
 LRmb_max_iter.grid_columnconfigure(0, weight=1)

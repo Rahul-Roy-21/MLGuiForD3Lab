@@ -534,3 +534,68 @@ class InProgressWindow:
     def is_active(self):
         # Check if the progress window is currently displayed
         return self.progress_window and self.progress_window.winfo_exists()
+    
+class CustomWarningBox:
+    def __init__(self, parent, warnings, my_font):
+        self.parent = parent
+        self.warnings = warnings
+        self.my_font = my_font
+
+        self.warning_box = CTkToplevel(parent, fg_color='white')
+        self.warning_box.title("Warnings")
+
+        # Configure grid to center elements
+        self.warning_box.grid_rowconfigure(0, weight=1)  # Space above the image
+        self.warning_box.grid_rowconfigure(1, weight=1)  # Space for warnings
+        self.warning_box.grid_rowconfigure(2, weight=1)  # Space for button
+        self.warning_box.grid_columnconfigure(0, weight=1)  # Center all columns
+
+        self.create_widgets()
+
+    def create_widgets(self):
+        # Add an icon or image at the top
+        warningImg = CTkImage(Image.open(getImgPath('warning1.png')), size=(100, 100))
+
+        img_label = CTkLabel(
+            master=self.warning_box, 
+            image=warningImg, 
+            text="Warning: Please check the issues below!",
+            compound=TOP,
+            bg_color="white",
+            text_color="red",
+            font=self.my_font,
+            anchor=CENTER
+        )
+        img_label.grid(row=0, column=0, pady=10)
+
+        # Add the warnings list with bullet points
+        warnings_frame = CTkFrame(self.warning_box, fg_color='white')
+        warnings_frame.grid(row=1, column=0, padx=20)
+
+        for idx, warning in enumerate(self.warnings, start=1):
+            warning_label = CTkLabel(
+                master=warnings_frame,
+                text=f"{idx}. {warning}",
+                bg_color="white",
+                font=self.my_font
+            )
+            warning_label.grid(row=idx, column=0, sticky=W, padx=20, pady=5, columnspan=2)
+
+        # Add a Close button
+        close_button = CTkButton(
+            master=self.warning_box, 
+            text="OK",
+            fg_color=COLORS['MEDIUMGREEN_FG'],
+            hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+            text_color='white',
+            border_spacing=0, 
+            corner_radius=0,
+            font=self.my_font,
+            command=self.warning_box.destroy
+        )
+        close_button.grid(row=2, column=0, pady=10)
+
+        # Keep the window on top and modal
+        self.warning_box.transient(self.parent)
+        self.warning_box.grab_set()
+        self.warning_box.resizable(False, False)
