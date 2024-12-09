@@ -123,10 +123,169 @@ def RF_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, RFmb_inputs: dict, 
         RFmb_resultsVar.set('..')
         CustomWarningBox(master, warnings, font)
 
+    if len(WARNINGS) == 0:
+        master.after(2000, update_success)
+    else:
+        master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))
+
+def SVM_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, SVMmb_inputs: dict, SVMmb_resultsVar: StringVar, font: CTkFont):
+    inProgress = InProgressWindow(master, loading_gif_path)
+    inProgress.create()
+    
+    SVMmb_out = {k:v.get() for k,v in SVMmb_inputs.items()}
+    WARNINGS = []
+
+    # C
+    try:
+        SVMmb_out["C"] = float(SVMmb_out["C"])
+    except:
+        WARNINGS.append('C must be int or float')
+
+    # DEGREE
+    try:
+        SVMmb_out["DEGREE"] = int(SVMmb_out["DEGREE"])
+    except:
+        WARNINGS.append("DEGREE must be an INTEGER")
+
+    # COEF0
+    try:
+        SVMmb_out["COEF0"] = float(SVMmb_out["COEF0"])
+    except:
+        WARNINGS.append('COEF0 must be float')
+
+    # TOL
+    try:
+        SVMmb_out["TOL"] = float(SVMmb_out["TOL"])
+    except:
+        WARNINGS.append('TOL must be float')
+
+    # RANDOM_STATE
+    try:
+        SVMmb_out["RANDOM_STATE"] = None if SVMmb_out["RANDOM_STATE"].lower()=='none' else int(SVMmb_out["RANDOM_STATE"])
+    except:
+        WARNINGS.append("RANDOM_STATE must be an INTEGER or 'None'")
+    
+    def update_success ():
+        inProgress.destroy()
+        SVMmb_resultsVar.set(jsonDumps(SVMmb_out, indent=4))
+        
+    def update_failure (warnings: list):
+        inProgress.destroy()
+        SVMmb_resultsVar.set('..')
+        CustomWarningBox(master, warnings, font)
 
     if len(WARNINGS) == 0:
         master.after(2000, update_success)
     else:
         master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))
 
+def LDA_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, LDAmb_inputs: dict, LDAmb_resultsVar: StringVar, font: CTkFont):
+    inProgress = InProgressWindow(master, loading_gif_path)
+    inProgress.create()
     
+    LDAmb_out = {k:v.get() for k,v in LDAmb_inputs.items()}
+    WARNINGS = []
+
+    # SHRINKAGE
+    try:
+        if LDAmb_out["SHRINKAGE"].lower()=='none':
+            LDAmb_out["SHRINKAGE"] = None
+        elif LDAmb_out["SHRINKAGE"].lower()=='auto':
+            LDAmb_out["SHRINKAGE"] = 'auto'
+        else:
+            LDAmb_out["SHRINKAGE"] = float(LDAmb_out["SHRINKAGE"])
+    except:
+        WARNINGS.append("SHRINKAGE must be a float, 'auto' or None")
+
+    # N_COMPONENTS
+    try:
+        LDAmb_out["N_COMPONENTS"] = None if LDAmb_out["N_COMPONENTS"].lower()=='none' else int(LDAmb_out["N_COMPONENTS"])
+    except:
+        WARNINGS.append("N_COMPONENTS must be an integer or None")
+
+    # TOL
+    try:
+        LDAmb_out["TOL"] = float(LDAmb_out["TOL"])
+    except:
+        WARNINGS.append('TOL must be float')
+
+    def update_success ():
+        inProgress.destroy()
+        LDAmb_resultsVar.set(jsonDumps(LDAmb_out, indent=4))
+        
+    def update_failure (warnings: list):
+        inProgress.destroy()
+        LDAmb_resultsVar.set('..')
+        CustomWarningBox(master, warnings, font)
+
+    if len(WARNINGS) == 0:
+        master.after(2000, update_success)
+    else:
+        master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))
+
+def LR_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, LRmb_inputs: dict, LRmb_resultsVar: StringVar, font: CTkFont):
+    inProgress = InProgressWindow(master, loading_gif_path)
+    inProgress.create()
+    
+    LRmb_out = {k:v.get() for k,v in LRmb_inputs.items()}
+    WARNINGS = []
+
+    # L1_RATIO
+    try:
+        LRmb_out["L1_RATIO"] = None if LRmb_out["L1_RATIO"].lower()=='none' else float(LRmb_out["L1_RATIO"])
+    except:
+        WARNINGS.append('L1_RATIO must be float or None')
+
+    # PENALTY
+    if LRmb_out["PENALTY"].lower()=='none':
+        LRmb_out["PENALTY"] = None
+    
+    # TOL
+    try:
+        LRmb_out["TOL"] = float(LRmb_out["TOL"])
+    except:
+        WARNINGS.append('TOL must be float')
+
+    # C
+    try:
+        LRmb_out["C"] = float(LRmb_out["C"])
+    except:
+        WARNINGS.append('C must be float')
+
+    # INTERCEPT_SCALING
+    try:
+        LRmb_out["INTERCEPT_SCALING"] = float(LRmb_out["INTERCEPT_SCALING"])
+    except:
+        WARNINGS.append('INTERCEPT_SCALING must be int or float')
+
+    # RANDOM_STATE
+    try:
+        LRmb_out["RANDOM_STATE"] = None if LRmb_out["RANDOM_STATE"].lower()=='none' else int(LRmb_out["RANDOM_STATE"])
+    except:
+        WARNINGS.append("RANDOM_STATE must be an INTEGER or 'None'")
+
+    # MAX_ITER
+    try:
+        LRmb_out["MAX_ITER"] = int(LRmb_out["MAX_ITER"])
+    except:
+        WARNINGS.append('MAX_ITER must be int')
+    
+    # N_JOBS
+    try:
+        LRmb_out["N_JOBS"] = None if LRmb_out["N_JOBS"].lower()=='none' else int(LRmb_out["N_JOBS"])
+    except:
+        WARNINGS.append("N_JOBS must be an integer or None")
+    
+    def update_success ():
+        inProgress.destroy()
+        LRmb_resultsVar.set(jsonDumps(LRmb_out, indent=4))
+        
+    def update_failure (warnings: list):
+        inProgress.destroy()
+        LRmb_resultsVar.set('..')
+        CustomWarningBox(master, warnings, font)
+
+    if len(WARNINGS) == 0:
+        master.after(2000, update_success)
+    else:
+        master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))

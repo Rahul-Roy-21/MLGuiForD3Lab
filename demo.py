@@ -1689,6 +1689,20 @@ SVMmb_break_ties_entry=CTkOptionMenu(
     )
 SVMmb_break_ties_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
+SVMmb_inputs = {
+    "C": SVMmbVar_C_field,
+    "KERNEL": SVMmbVar_kernel,
+    "DEGREE": SVMmbVar_degree,
+    "GAMMA": SVMmbVar_gamma,
+    "COEF0": SVMmbVar_coef0,
+    "TOL": SVMmbVar_tol,
+    "SHRINKING": SVMmbVar_shrinking,
+    "PROBABILITY": SVMmbVar_probability,
+    "RANDOM_STATE": SVMmbVar_random_state,
+    "BREAK_TIES": SVMmbVar_break_ties,
+    "DECISION_FUNCTION_SHAPE": SVMmbVar_decision_function_shape
+}
+
 SVMmb_submitBtn = CTkButton(
     master=SVMmb_hyperParams,
     text='Submit',
@@ -1699,7 +1713,7 @@ SVMmb_submitBtn = CTkButton(
     corner_radius=0,
     width=200,
     border_spacing=0,
-    command=lambda: print('SUBMIT SVMmb !!')
+    command=lambda: SVM_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, SVMmb_inputs, SVMmb_resultsVar, my_font1)
 )
 SVMmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
 
@@ -1803,6 +1817,14 @@ LDAmb_store_covariance_entry=CTkOptionMenu(
     )
 LDAmb_store_covariance_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
+LDAmb_inputs = {
+    "SOLVER": LDAmbVar_solver,
+    "SHRINKAGE": LDAmbVar_shrinkage,
+    'N_COMPONENTS': LDAmbVar_n_components,
+    'TOL': LDAmbVar_tol,
+    "STORE_COVARIANCE": LDAmbVar_store_covariance
+}
+
 LDAmb_submitBtn = CTkButton(
     master=LDAmb_hyperParams,
     text='Submit',
@@ -1813,7 +1835,7 @@ LDAmb_submitBtn = CTkButton(
     corner_radius=0,
     width=200,
     border_spacing=0,
-    command=lambda: print('SUBMIT LDAmb !!')
+    command=lambda: LDA_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, LDAmb_inputs, LDAmb_resultsVar, my_font1)
 )
 LDAmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
 
@@ -2029,6 +2051,21 @@ LRmb_n_jobs_entry=CTkEntry(
     )
 LRmb_n_jobs_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
+LRmb_inputs = {
+    "L1_RATIO": LRmbVar_l1_ratio,
+    "PENALTY": LRmbVar_penalty,
+    "TOL": LRmbVar_tol,
+    "C": LRmbVar_C_field,
+    "FIT_INTERCEPT": LRmbVar_fit_intercept,
+    "INTERCEPT_SCALING": LRmbVar_intercept_scaling,
+    "RANDOM_STATE": LRmbVar_randomState,
+    "SOLVER": LRmbVar_solver,
+    "WARM_START": LRmbVar_warmStart,
+    "MAX_ITER": LRmbVar_max_iter,
+    "MULTI_CLASS": LRmbVar_multi_class,
+    "N_JOBS": LRmbVar_n_jobs
+}
+
 LRmb_submitBtn = CTkButton(
     master=LRmb_hyperParams,
     text='Submit',
@@ -2039,7 +2076,7 @@ LRmb_submitBtn = CTkButton(
     corner_radius=0,
     width=200,
     border_spacing=0,
-    command=lambda: print('SUBMIT LR !!')
+    command=lambda: LR_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, LRmb_inputs, LRmb_resultsVar, my_font1)
 )
 LRmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
 

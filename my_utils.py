@@ -566,7 +566,7 @@ class CustomWarningBox:
             font=self.my_font,
             anchor=CENTER
         )
-        img_label.grid(row=0, column=0, pady=10)
+        img_label.grid(row=0, column=0, pady=10, padx=10)
 
         # Add the warnings list with bullet points
         warnings_frame = CTkFrame(self.warning_box, fg_color='white')
