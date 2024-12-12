@@ -1,6 +1,7 @@
 from customtkinter import *
 from PIL import Image, ImageSequence
 from os import path as os_path
+from ml_utils import *
 
 # COLORS
 COLORS={
@@ -17,6 +18,53 @@ COLORS={
 
 def getImgPath (img_name, image_dir='images'):
     return os_path.join(image_dir, img_name)
+
+class FeatureSelectEntry(CTkFrame):
+    def __init__(self, parent:CTkFrame, my_font:CTkFont, selectedOptionsVar:StringVar, allOptionsVar:StringVar, trainPathVar: StringVar, testPathVar: StringVar, MIN_CHOOSE:int=2):
+        super().__init__(parent)
+        parent.grid_columnconfigure(0, weight=1)
+
+        self.grid(row=0, column=0)
+        self.grid_columnconfigure(0, weight=1)
+        self.configure(fg_color=COLORS["SKYBLUE_FG"])
+
+        self.my_font = my_font
+        self.selectedOptions_var = selectedOptionsVar
+        self.allOptionsVar=allOptionsVar
+        self.trainPathVar = trainPathVar
+        self.testPathVar = testPathVar
+        self.MIN_CHOOSE = MIN_CHOOSE
+        self.search_image = CTkImage(Image.open(getImgPath("search.png")), size=(24, 24))
+
+        self.value_label = CTkEntry(
+            self, textvariable=self.selectedOptions_var ,font=my_font, border_width=0, justify=CENTER,
+            fg_color="white", text_color="black", state='disabled', corner_radius=0
+        )
+        self.value_label.grid(row=0, column=0, sticky=NSEW)
+
+        self.select_button = CTkButton(
+            self, image=self.search_image, text="", 
+            fg_color=COLORS["GREY_FG"],
+            hover_color=COLORS["GREY_HOVER_FG"],
+            command=self.open_featureSelectionWindow, width=50, corner_radius=0
+        )
+        self.select_button.grid(row=0, column=1)
+
+    def open_featureSelectionWindow(self):
+        if not self.trainPathVar.get() or not self.testPathVar.get():
+            CustomWarningBox(self, ["Please select both Train and Test files first."], self.my_font)
+            return
+        
+        valid, columns = CHECK_XLS_FILES(self.trainPathVar.get(), self.testPathVar.get())
+        if not valid:
+            self.allOptionsVar.set("")
+            self.selectedOptions_var.set("")
+            CustomWarningBox(self, ["Train and Test files do not have identical column sets."], self.my_font)
+        else:
+            try:
+                MultiSelectDialog(self, "Features", list(self.allOptionsVar.get().split(',')), self.selectedOptions_var, self.my_font, self.MIN_CHOOSE)
+            except Exception as ex:
+                CustomWarningBox(self, [ex], self.my_font)
 
 class MultiSelectEntry(CTkFrame):
     def __init__(self, parent:CTkFrame, whatToChoosePlural:str, my_font:CTkFont, tkVar:StringVar, options:list[str], MIN_CHOOSE:int=2):
@@ -49,7 +97,10 @@ class MultiSelectEntry(CTkFrame):
         self.select_button.grid(row=0, column=1)
 
     def open_selection_window(self):
-        MultiSelectDialog(self, self.whatToChoosePlural, self.options, self.selectedOptions_var, self.my_font, self.MIN_CHOOSE)
+        try:
+            MultiSelectDialog(self, self.whatToChoosePlural, self.options, self.selectedOptions_var, self.my_font, self.MIN_CHOOSE)
+        except Exception as ex:
+            CustomWarningBox(self, [ex], self.my_font)
 
 class MyIntegerEntry(CTkFrame):
     def __init__(self, parent:CTkFrame, my_font:CTkFont, tkVar:IntVar, min_value=1, max_value=100):
@@ -454,7 +505,6 @@ class MultiSelectDialog(CTkToplevel):
         self.destroy()
 
     def check_num_of_options(self, choice):
-        print(f'RUNNING check_num_of_options ({choice})')
         # If choice is DESELECTED and Num.of selected < MIN_CHOOSE
         if self.checkboxes[choice].get()==0 and sum(cbox.get() for cbox in self.checkboxes.values()) < self.MIN_CHOOSE:
             self.checkboxes[choice].select()
@@ -575,7 +625,7 @@ class CustomWarningBox:
         for idx, warning in enumerate(self.warnings, start=1):
             warning_label = CTkLabel(
                 master=warnings_frame,
-                text=f"{idx}. {warning}",
+                text=f"{idx}. {warning}" if len(self.warnings)>1 else f"{warning}",
                 bg_color="white",
                 font=self.my_font
             )

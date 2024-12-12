@@ -3,6 +3,7 @@ import tkinter as tk
 from PIL import Image
 from my_utils import *
 from my_util_functions import *
+from ml_utils import *
 
 set_appearance_mode('light')
 
@@ -31,7 +32,7 @@ def on_focus_in(ctkEntry):
 def on_focus_out(ctkEntry):
     ctkEntry.configure(border_color="#bbb")
 
-train_entryVar=tk.StringVar()
+train_entryVar=StringVar()
 train_entry=CTkEntry(
     master=dataset_frame, 
     textvariable=train_entryVar, 
@@ -42,7 +43,7 @@ train_entry=CTkEntry(
 train_entry.bind('<FocusIn>',lambda e: on_focus_in(train_entry))
 train_entry.bind('<FocusOut>',lambda e: on_focus_out(train_entry))
 
-test_entryVar=tk.StringVar()
+test_entryVar=StringVar()
 test_entry=CTkEntry(
     master=dataset_frame, 
     textvariable=test_entryVar, 
@@ -55,14 +56,34 @@ test_entry.bind('<FocusOut>',lambda e: on_focus_out(test_entry))
 
 upload_img = CTkImage(light_image=Image.open(getImgPath('upload.png')), size=(20, 20))
 
-def open_file_dialog(field_name: str, file_path_entry_var: tk.StringVar):
+# GLOBAL fields for storing LOADED_FEATURES & SELECTED_FEATURES
+ALL_LOADED_FEATURES = StringVar()
+SELECTED_FEATURES = StringVar()
+
+#ALL_LOADED_FEATURES.trace('w', lambda *args: print(f'ALL_LOADED_FEATURES --> {ALL_LOADED_FEATURES.get()}'))
+#SELECTED_FEATURES.trace('w', lambda *args: print(f'SELECTED_FEATURES --> {SELECTED_FEATURES.get()}'))
+
+def VALIDATE_TRAIN_TEST_FILES ():
+    if not train_entryVar.get() or not test_entryVar.get():
+        return
+    valid, loaded_columns = CHECK_XLS_FILES(train_entryVar.get(), test_entryVar.get())
+    if valid:
+        ALL_LOADED_FEATURES.set(",".join(loaded_columns))
+        SELECTED_FEATURES.set(ALL_LOADED_FEATURES.get())
+    else:
+        ALL_LOADED_FEATURES.set("")
+        SELECTED_FEATURES.set("")
+        CustomWarningBox(root, ["Train and Test files do not have identical column sets."], my_font1)
+
+def open_file_dialog(field_name: str, file_path_entry_var: StringVar):
     file_path = filedialog.askopenfilename(
         title=f"Select a file for {field_name}",
-        filetypes=(("Text Files", "*.txt"), ("All Files", "*.*"))
+        filetypes=[("Excel files", "*.xlsx")]
     )
     if file_path:
         # Update the label with the selected file path
         file_path_entry_var.set(file_path)
+        VALIDATE_TRAIN_TEST_FILES()
 
 train_btn = CTkButton(
     master=dataset_frame,
@@ -183,7 +204,7 @@ show_frame(panelList, [], default_panel, None)
 
 # FEATURE/ALGORITHM SELECTION FRAME (IN a TASK_PANEL)
 class FeatureSelectionDialog(CTkToplevel):
-    def __init__(self, parent, options, selected_feature_tkStringVar: tk.StringVar):
+    def __init__(self, parent, options, selected_feature_tkStringVar: StringVar):
         super().__init__(parent)
         self.title("Choose Features")
         self.geometry("300x300")
@@ -247,15 +268,14 @@ class FeatureSelectionDialog(CTkToplevel):
             if checkBox.get():
                 self.selected_options.append(option)
 
-        # Update the tk.StringVar with the selected options
+        # Update the StringVar with the selected options
         self.selected_feature_tkStringVar.set(
             ','.join(sorted(self.selected_options)).strip(',')
         )
         self.destroy()
 
 def build_featureAlgoFrame(
-        masterFrame: CTkFrame, listOfAlgorithms: list[str], listOfFeatures: list[str], 
-        selected_features: tk.StringVar, selected_algorithm: tk.StringVar
+        masterFrame: CTkFrame, listOfAlgorithms: list[str], loaded_features: StringVar, selected_features: StringVar, selected_algorithm: StringVar
     ):
     featureAlgo_frame=CTkFrame(master=masterFrame, fg_color=COLORS['SKYBLUE_FG'])
     featureAlgo_frame.grid(row=0,column=0,columnspan=7,sticky=NSEW,padx=(5,2),pady=5)
@@ -263,14 +283,13 @@ def build_featureAlgoFrame(
     # ROW (idx): featureLabel(0)--featureMultiSelectEntry(1,2,3)--algoLabel(4)--algoDropDown(5,6)
 
     features_label=CTkLabel(master=featureAlgo_frame, text='Features list:', font=my_font1)
-    selected_features.set(','.join(listOfFeatures))
-    features_multiSelectEntry = MultiSelectEntry(
+    features_multiSelectEntry = FeatureSelectEntry(
         parent=featureAlgo_frame,
-        whatToChoosePlural='Features',
         my_font=my_font1,
-        tkVar=selected_features,
-        MIN_CHOOSE=2,
-        options=listOfFeatures
+        selectedOptionsVar=selected_features,
+        allOptionsVar=loaded_features,
+        trainPathVar=train_entryVar,
+        testPathVar=test_entryVar
     )
 
     algo_label=CTkLabel(master=featureAlgo_frame, text='Algorithm:', font=my_font1)
@@ -317,13 +336,12 @@ HYPER_PARAM_OPTIM_ALGORITHMS=[
     'Multi-Layer Perceptron (ANN)'
 ]
 
-hp_optim_selected_features=tk.StringVar()
-hp_optim_selected_algorithm=tk.StringVar()
+hp_optim_selected_algorithm=StringVar()
 algo_dropdown = build_featureAlgoFrame(
     masterFrame=hyperparam_optim_panel,
     listOfAlgorithms=HYPER_PARAM_OPTIM_ALGORITHMS,
-    listOfFeatures=['f11','f12','f13','f14','f15','f16','f17','f18','f19'],
-    selected_features=hp_optim_selected_features,
+    loaded_features=ALL_LOADED_FEATURES,
+    selected_features=SELECTED_FEATURES,
     selected_algorithm=hp_optim_selected_algorithm
 )
 
@@ -352,7 +370,7 @@ RF_crossValidFold.grid(row=0, column=6, padx=5, pady=2, sticky=NSEW)
 RF_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 RF_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 
-RFVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+RFVar_method=StringVar(value=METHOD_OPTIONS[0])
 RF_method.grid_columnconfigure(0, weight=1)
 RF_method_dropdown=CTkOptionMenu(
         master=RF_method, 
@@ -368,7 +386,7 @@ RF_method_dropdown=CTkOptionMenu(
 RF_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 
-RFVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+RFVar_scoring=StringVar(value=SCORING_OPTIONS[0])
 RF_scoring.grid_columnconfigure(0, weight=1)
 RF_scoring_dropdown=CTkOptionMenu(
         master=RF_scoring, 
@@ -511,7 +529,7 @@ SVM_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 SVM_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 SVM_labelFrame.grid_rowconfigure(2, weight=1)
 
-SVMVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+SVMVar_method=StringVar(value=METHOD_OPTIONS[0])
 SVM_method.grid_columnconfigure(0, weight=1)
 SVM_method_dropdown=CTkOptionMenu(
         master=SVM_method, 
@@ -526,7 +544,7 @@ SVM_method_dropdown=CTkOptionMenu(
     )
 SVM_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+SVMVar_scoring=StringVar(value=SCORING_OPTIONS[0])
 SVM_scoring.grid_columnconfigure(0, weight=1)
 SVM_scoring_dropdown=CTkOptionMenu(
         master=SVM_scoring, 
@@ -632,7 +650,7 @@ LR_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 LR_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 LR_labelFrame.grid_rowconfigure(2, weight=1)
 
-LRVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+LRVar_method=StringVar(value=METHOD_OPTIONS[0])
 LR_method.grid_columnconfigure(0, weight=1)
 LR_method_dropdown=CTkOptionMenu(
         master=LR_method, 
@@ -647,7 +665,7 @@ LR_method_dropdown=CTkOptionMenu(
     )
 LR_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+LRVar_scoring=StringVar(value=SCORING_OPTIONS[0])
 LR_scoring.grid_columnconfigure(0, weight=1)
 LR_scoring_dropdown=CTkOptionMenu(
         master=LR_scoring, 
@@ -753,7 +771,7 @@ LDA_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 LDA_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 LDA_labelFrame.grid_rowconfigure(2, weight=1)
 
-LDAVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+LDAVar_method=StringVar(value=METHOD_OPTIONS[0])
 LDA_method.grid_columnconfigure(0, weight=1)
 LDA_method_dropdown=CTkOptionMenu(
         master=LDA_method, 
@@ -768,7 +786,7 @@ LDA_method_dropdown=CTkOptionMenu(
     )
 LDA_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LDAVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+LDAVar_scoring=StringVar(value=SCORING_OPTIONS[0])
 LDA_scoring.grid_columnconfigure(0, weight=1)
 LDA_scoring_dropdown=CTkOptionMenu(
         master=LDA_scoring, 
@@ -846,7 +864,7 @@ KNN_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 KNN_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 KNN_labelFrame.grid_rowconfigure(2, weight=1)
 
-KNNVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+KNNVar_method=StringVar(value=METHOD_OPTIONS[0])
 KNN_method.grid_columnconfigure(0, weight=1)
 KNN_method_dropdown=CTkOptionMenu(
         master=KNN_method, 
@@ -862,7 +880,7 @@ KNN_method_dropdown=CTkOptionMenu(
 KNN_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 
-KNNVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+KNNVar_scoring=StringVar(value=SCORING_OPTIONS[0])
 KNN_scoring.grid_columnconfigure(0, weight=1)
 KNN_scoring_dropdown=CTkOptionMenu(
         master=KNN_scoring, 
@@ -964,7 +982,7 @@ GRB_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 GRB_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 GRB_labelFrame.grid_rowconfigure(2, weight=1)
 
-GRBVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+GRBVar_method=StringVar(value=METHOD_OPTIONS[0])
 GRB_method.grid_columnconfigure(0, weight=1)
 GRB_method_dropdown=CTkOptionMenu(
         master=GRB_method, 
@@ -980,7 +998,7 @@ GRB_method_dropdown=CTkOptionMenu(
 GRB_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 
-GRBVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+GRBVar_scoring=StringVar(value=SCORING_OPTIONS[0])
 GRB_scoring.grid_columnconfigure(0, weight=1)
 GRB_scoring_dropdown=CTkOptionMenu(
         master=GRB_scoring, 
@@ -1124,7 +1142,7 @@ MLP_hyperParams.grid(row=1, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 MLP_results.grid(row=2, column=0, columnspan=7, padx=5, pady=2, sticky=NSEW)
 MLP_labelFrame.grid_rowconfigure(2, weight=1)
 
-MLPVar_method=tk.StringVar(value=METHOD_OPTIONS[0])
+MLPVar_method=StringVar(value=METHOD_OPTIONS[0])
 MLP_method.grid_columnconfigure(0, weight=1)
 MLP_method_dropdown=CTkOptionMenu(
         master=MLP_method, 
@@ -1139,7 +1157,7 @@ MLP_method_dropdown=CTkOptionMenu(
     )
 MLP_method_dropdown.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-MLPVar_scoring=tk.StringVar(value=SCORING_OPTIONS[0])
+MLPVar_scoring=StringVar(value=SCORING_OPTIONS[0])
 MLP_scoring.grid_columnconfigure(0, weight=1)
 MLP_scoring_dropdown=CTkOptionMenu(
         master=MLP_scoring, 
@@ -1272,13 +1290,12 @@ show_hyperParamOptim_AlgoLabelFrame(HYPER_PARAM_OPTIM_ALGORITHMS[0])
 
 
 # MODEL_BUILD panel
-model_build_selected_features=tk.StringVar()
-model_build_selected_algorithm=tk.StringVar()
+model_build_selected_algorithm=StringVar()
 algo_dropdown = build_featureAlgoFrame(
     masterFrame=model_build_panel,
     listOfAlgorithms=HYPER_PARAM_OPTIM_ALGORITHMS,
-    listOfFeatures=['f21','f22','f23'],
-    selected_features=model_build_selected_features,
+    loaded_features=ALL_LOADED_FEATURES,
+    selected_features=SELECTED_FEATURES,
     selected_algorithm=model_build_selected_algorithm
 )
 
@@ -1298,7 +1315,7 @@ RFmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
 RFmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
 RFmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
 
-RFmbVar_nEstimators=tk.StringVar(value='100')
+RFmbVar_nEstimators=StringVar(value='100')
 RFmb_nEstimators = build_ArgListLabelFrame(RFmb_hyperParams, 'n_estimators')
 RFmb_nEstimators.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 RFmb_nEstimators.grid_columnconfigure(0, weight=1)
@@ -1312,7 +1329,7 @@ RFmb_nEstimators_entry=CTkEntry(
     )
 RFmb_nEstimators_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_criterion=tk.StringVar(value=RFVar_criterions_options[0])
+RFmbVar_criterion=StringVar(value=RFVar_criterions_options[0])
 RFmb_criterion = build_ArgListLabelFrame(RFmb_hyperParams, 'criterion')
 RFmb_criterion.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
 RFmb_criterion.grid_columnconfigure(0, weight=1)
@@ -1330,7 +1347,7 @@ RFmb_criterion_entry=CTkOptionMenu(
     )
 RFmb_criterion_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_maxDepth=tk.StringVar(value='None')
+RFmbVar_maxDepth=StringVar(value='None')
 RFmb_maxDepth = build_ArgListLabelFrame(RFmb_hyperParams, 'max_depth')
 RFmb_maxDepth.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
 RFmb_maxDepth.grid_columnconfigure(0, weight=1)
@@ -1344,7 +1361,7 @@ RFmb_maxDepth_entry=CTkEntry(
     )
 RFmb_maxDepth_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_minSamplesSplit=tk.StringVar(value='2')
+RFmbVar_minSamplesSplit=StringVar(value='2')
 RFmb_minSamplesSplit = build_ArgListLabelFrame(RFmb_hyperParams, 'min_sample_split')
 RFmb_minSamplesSplit.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
 RFmb_minSamplesSplit.grid_columnconfigure(0, weight=1)
@@ -1358,7 +1375,7 @@ RFmb_minSamplesSplit_entry=CTkEntry(
     )
 RFmb_minSamplesSplit_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_minSamplesLeaf=tk.StringVar(value='1')
+RFmbVar_minSamplesLeaf=StringVar(value='1')
 RFmb_minSamplesLeaf = build_ArgListLabelFrame(RFmb_hyperParams, 'min_sample_leaf')
 RFmb_minSamplesLeaf.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
 RFmb_minSamplesLeaf.grid_columnconfigure(0, weight=1)
@@ -1372,7 +1389,7 @@ RFmb_minSamplesLeaf_entry=CTkEntry(
     )
 RFmb_minSamplesLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_minImpurityDecrease=tk.StringVar(value='0.0')
+RFmbVar_minImpurityDecrease=StringVar(value='0.0')
 RFmb_minImpurityDecrease = build_ArgListLabelFrame(RFmb_hyperParams, 'min_impurity_decrease')
 RFmb_minImpurityDecrease.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
 RFmb_minImpurityDecrease.grid_columnconfigure(0, weight=1)
@@ -1386,7 +1403,7 @@ RFmb_minImpurityDecrease_entry=CTkEntry(
     )
 RFmb_minImpurityDecrease_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_randomState=tk.StringVar(value='None')
+RFmbVar_randomState=StringVar(value='None')
 RFmb_randomState = build_ArgListLabelFrame(RFmb_hyperParams, 'random_state')
 RFmb_randomState.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
 RFmb_randomState.grid_columnconfigure(0, weight=1)
@@ -1400,7 +1417,7 @@ RFmb_randomState_entry=CTkEntry(
     )
 RFmb_randomState_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_warmStart=tk.StringVar(value='False')
+RFmbVar_warmStart=StringVar(value='False')
 RFmb_warmStart = build_ArgListLabelFrame(RFmb_hyperParams, 'warm_start')
 RFmb_warmStart.grid(row=1, column=2, padx=10, pady=5, sticky=EW)
 RFmb_warmStart.grid_columnconfigure(0, weight=1)
@@ -1418,7 +1435,7 @@ RFmb_warmStart_entry=CTkOptionMenu(
     )
 RFmb_warmStart_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_maxFeatures=tk.StringVar(value='sqrt')
+RFmbVar_maxFeatures=StringVar(value='sqrt')
 RFmb_maxFeatures = build_ArgListLabelFrame(RFmb_hyperParams, 'max_features')
 RFmb_maxFeatures.grid(row=1, column=3, padx=10, pady=5, sticky=EW)
 RFmb_maxFeatures.grid_columnconfigure(0, weight=1)
@@ -1432,7 +1449,7 @@ RFmb_maxFeatures_entry=CTkEntry(
     )
 RFmb_maxFeatures_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_minWeightFractionLeaf=tk.StringVar(value='0.0')
+RFmbVar_minWeightFractionLeaf=StringVar(value='0.0')
 RFmb_minWeightFractionLeaf = build_ArgListLabelFrame(RFmb_hyperParams, 'min_weight_fraction_leaf')
 RFmb_minWeightFractionLeaf.grid(row=1, column=4, padx=10, pady=5, sticky=EW)
 RFmb_minWeightFractionLeaf.grid_columnconfigure(0, weight=1)
@@ -1446,7 +1463,7 @@ RFmb_minWeightFractionLeaf_entry=CTkEntry(
     )
 RFmb_minWeightFractionLeaf_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-RFmbVar_maxLeafNodes=tk.StringVar(value='None')
+RFmbVar_maxLeafNodes=StringVar(value='None')
 RFmb_maxLeafNodes = build_ArgListLabelFrame(RFmb_hyperParams, 'max_leaf_nodes')
 RFmb_maxLeafNodes.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
 RFmb_maxLeafNodes.grid_columnconfigure(0, weight=1)
@@ -1510,7 +1527,7 @@ SVMmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
 SVMmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
 SVMmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
 
-SVMmbVar_C_field=tk.StringVar(value='1.0')
+SVMmbVar_C_field=StringVar(value='1.0')
 SVMmb_C_field = build_ArgListLabelFrame(SVMmb_hyperParams, 'C')
 SVMmb_C_field.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 SVMmb_C_field.grid_columnconfigure(0, weight=1)
@@ -1524,7 +1541,7 @@ SVMmb_C_field_entry=CTkEntry(
     )
 SVMmb_C_field_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_kernel=tk.StringVar(value='rbf')
+SVMmbVar_kernel=StringVar(value='rbf')
 SVMmb_kernel = build_ArgListLabelFrame(SVMmb_hyperParams, 'kernel')
 SVMmb_kernel.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
 SVMmb_kernel.grid_columnconfigure(0, weight=1)
@@ -1542,7 +1559,7 @@ SVMmb_kernel_entry=CTkOptionMenu(
     )
 SVMmb_kernel_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_degree=tk.StringVar(value='3')
+SVMmbVar_degree=StringVar(value='3')
 SVMmb_degree = build_ArgListLabelFrame(SVMmb_hyperParams, 'degree')
 SVMmb_degree.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
 SVMmb_degree.grid_columnconfigure(0, weight=1)
@@ -1556,7 +1573,7 @@ SVMmb_degree_entry=CTkEntry(
     )
 SVMmb_degree_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_gamma=tk.StringVar(value=SVMVar_gamma_options[0])
+SVMmbVar_gamma=StringVar(value=SVMVar_gamma_options[0])
 SVMmb_gamma = build_ArgListLabelFrame(SVMmb_hyperParams, 'gamma')
 SVMmb_gamma.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
 SVMmb_gamma.grid_columnconfigure(0, weight=1)
@@ -1574,7 +1591,7 @@ SVMmb_gamma_entry=CTkOptionMenu(
     )
 SVMmb_gamma_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_coef0=tk.StringVar(value='0.0')
+SVMmbVar_coef0=StringVar(value='0.0')
 SVMmb_coef0 = build_ArgListLabelFrame(SVMmb_hyperParams, 'coef0')
 SVMmb_coef0.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
 SVMmb_coef0.grid_columnconfigure(0, weight=1)
@@ -1588,7 +1605,7 @@ SVMmb_coef0_entry=CTkEntry(
     )
 SVMmb_coef0_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_tol=tk.StringVar(value='0.001')
+SVMmbVar_tol=StringVar(value='0.001')
 SVMmb_tol = build_ArgListLabelFrame(SVMmb_hyperParams, 'tol')
 SVMmb_tol.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
 SVMmb_tol.grid_columnconfigure(0, weight=1)
@@ -1602,7 +1619,7 @@ SVMmb_tol_entry=CTkEntry(
     )
 SVMmb_tol_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_shrinking=tk.StringVar(value='True')
+SVMmbVar_shrinking=StringVar(value='True')
 SVMmb_shrinking = build_ArgListLabelFrame(SVMmb_hyperParams, 'shrinking')
 SVMmb_shrinking.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
 SVMmb_shrinking.grid_columnconfigure(0, weight=1)
@@ -1620,7 +1637,7 @@ SVMmb_shrinking_entry=CTkOptionMenu(
     )
 SVMmb_shrinking_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_probability=tk.StringVar(value='False')
+SVMmbVar_probability=StringVar(value='False')
 SVMmb_probability = build_ArgListLabelFrame(SVMmb_hyperParams, 'probability')
 SVMmb_probability.grid(row=1, column=2, padx=10, pady=5, sticky=EW)
 SVMmb_probability.grid_columnconfigure(0, weight=1)
@@ -1638,7 +1655,7 @@ SVMmb_probability_entry=CTkOptionMenu(
     )
 SVMmb_probability_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_random_state=tk.StringVar(value='None')
+SVMmbVar_random_state=StringVar(value='None')
 SVMmb_random_state = build_ArgListLabelFrame(SVMmb_hyperParams, 'random_state')
 SVMmb_random_state.grid(row=1, column=3, padx=10, pady=5, sticky=EW)
 SVMmb_random_state.grid_columnconfigure(0, weight=1)
@@ -1653,7 +1670,7 @@ SVMmb_random_state_entry=CTkEntry(
 SVMmb_random_state_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 SVMVar_decision_function_shape_options = ['ovr','ovo']
-SVMmbVar_decision_function_shape=tk.StringVar(value=SVMVar_decision_function_shape_options[0])
+SVMmbVar_decision_function_shape=StringVar(value=SVMVar_decision_function_shape_options[0])
 SVMmb_decision_function_shape = build_ArgListLabelFrame(SVMmb_hyperParams, 'decision_function_shape')
 SVMmb_decision_function_shape.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
 SVMmb_decision_function_shape.grid_columnconfigure(0, weight=1)
@@ -1671,7 +1688,7 @@ SVMmb_decision_function_shape_entry=CTkOptionMenu(
     )
 SVMmb_decision_function_shape_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-SVMmbVar_break_ties=tk.StringVar(value='False')
+SVMmbVar_break_ties=StringVar(value='False')
 SVMmb_break_ties = build_ArgListLabelFrame(SVMmb_hyperParams, 'break_ties')
 SVMmb_break_ties.grid(row=1, column=4, padx=10, pady=5, sticky=EW)
 SVMmb_break_ties.grid_columnconfigure(0, weight=1)
@@ -1739,7 +1756,7 @@ LDAmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
 LDAmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
 LDAmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
 
-LDAmbVar_solver=tk.StringVar(value=LDAVar_solver_options[0])
+LDAmbVar_solver=StringVar(value=LDAVar_solver_options[0])
 LDAmb_solver = build_ArgListLabelFrame(LDAmb_hyperParams, 'solver')
 LDAmb_solver.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 LDAmb_solver.grid_columnconfigure(0, weight=1)
@@ -1757,7 +1774,7 @@ LDAmb_solver_entry=CTkOptionMenu(
     )
 LDAmb_solver_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LDAmbVar_shrinkage=tk.StringVar(value=3)
+LDAmbVar_shrinkage=StringVar(value=3)
 LDAmb_shrinkage = build_ArgListLabelFrame(LDAmb_hyperParams, 'shrinkage')
 LDAmb_shrinkage.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
 LDAmb_shrinkage.grid_columnconfigure(0, weight=1)
@@ -1771,7 +1788,7 @@ LDAmb_shrinkage_entry=CTkEntry(
     )
 LDAmb_shrinkage_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LDAmbVar_n_components=tk.StringVar(value='None')
+LDAmbVar_n_components=StringVar(value='None')
 LDAmb_n_components = build_ArgListLabelFrame(LDAmb_hyperParams, 'n_components')
 LDAmb_n_components.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
 LDAmb_n_components.grid_columnconfigure(0, weight=1)
@@ -1785,7 +1802,7 @@ LDAmb_n_components_entry=CTkEntry(
     )
 LDAmb_n_components_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LDAmbVar_tol=tk.StringVar(value='0.001')
+LDAmbVar_tol=StringVar(value='0.001')
 LDAmb_tol = build_ArgListLabelFrame(LDAmb_hyperParams, 'tol')
 LDAmb_tol.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
 LDAmb_tol.grid_columnconfigure(0, weight=1)
@@ -1799,7 +1816,7 @@ LDAmb_tol_entry=CTkEntry(
     )
 LDAmb_tol_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LDAmbVar_store_covariance=tk.StringVar(value='False')
+LDAmbVar_store_covariance=StringVar(value='False')
 LDAmb_store_covariance = build_ArgListLabelFrame(LDAmb_hyperParams, 'store_covariance')
 LDAmb_store_covariance.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
 LDAmb_store_covariance.grid_columnconfigure(0, weight=1)
@@ -1862,7 +1879,7 @@ LRmb_hyperParams.grid(row=0, column=0, padx=5, pady=2, sticky=NSEW)
 LRmb_results.grid(row=1, column=0, padx=5, pady=2, sticky=NSEW)
 LRmb_hyperParams.grid_columnconfigure(tuple(range(5)), weight=1)
 
-LRmbVar_l1_ratio=tk.StringVar(value='None')
+LRmbVar_l1_ratio=StringVar(value='None')
 LRmb_l1_ratio = build_ArgListLabelFrame(LRmb_hyperParams, 'l1_ratio')
 LRmb_l1_ratio.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 LRmb_l1_ratio.grid_columnconfigure(0, weight=1)
@@ -1876,7 +1893,7 @@ LRmb_l1_ratio_entry=CTkEntry(
     )
 LRmb_l1_ratio_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_penalty=tk.StringVar(value=LRVar_penalty_options[1])
+LRmbVar_penalty=StringVar(value=LRVar_penalty_options[1])
 LRmb_penalty = build_ArgListLabelFrame(LRmb_hyperParams, 'penalty')
 LRmb_penalty.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
 LRmb_penalty.grid_columnconfigure(0, weight=1)
@@ -1894,7 +1911,7 @@ LRmb_penalty_entry=CTkOptionMenu(
     )
 LRmb_penalty_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_tol=tk.StringVar(value='0.0001')
+LRmbVar_tol=StringVar(value='0.0001')
 LRmb_tol = build_ArgListLabelFrame(LRmb_hyperParams, 'tol')
 LRmb_tol.grid(row=0, column=2, padx=10, pady=5, sticky=EW)
 LRmb_tol.grid_columnconfigure(0, weight=1)
@@ -1908,7 +1925,7 @@ LRmb_tol_entry=CTkEntry(
     )
 LRmb_tol_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_C_field=tk.StringVar(value='1.0')
+LRmbVar_C_field=StringVar(value='1.0')
 LRmb_C_field = build_ArgListLabelFrame(LRmb_hyperParams, 'C')
 LRmb_C_field.grid(row=0, column=3, padx=10, pady=5, sticky=EW)
 LRmb_C_field.grid_columnconfigure(0, weight=1)
@@ -1922,7 +1939,7 @@ LRmb_C_field_entry=CTkEntry(
     )
 LRmb_C_field_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_fit_intercept=tk.StringVar(value='True')
+LRmbVar_fit_intercept=StringVar(value='True')
 LRmb_fit_intercept = build_ArgListLabelFrame(LRmb_hyperParams, 'fit_intercept')
 LRmb_fit_intercept.grid(row=0, column=4, padx=10, pady=5, sticky=EW)
 LRmb_fit_intercept.grid_columnconfigure(0, weight=1)
@@ -1940,7 +1957,7 @@ LRmb_fit_intercept_entry=CTkOptionMenu(
     )
 LRmb_fit_intercept_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_intercept_scaling=tk.StringVar(value='1.0')
+LRmbVar_intercept_scaling=StringVar(value='1.0')
 LRmb_intercept_scaling = build_ArgListLabelFrame(LRmb_hyperParams, 'intercept_scaling')
 LRmb_intercept_scaling.grid(row=1, column=0, padx=10, pady=5, sticky=EW)
 LRmb_intercept_scaling.grid_columnconfigure(0, weight=1)
@@ -1954,7 +1971,7 @@ LRmb_intercept_scaling_entry=CTkEntry(
     )
 LRmb_intercept_scaling_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_randomState=tk.StringVar(value='None')
+LRmbVar_randomState=StringVar(value='None')
 LRmb_randomState = build_ArgListLabelFrame(LRmb_hyperParams, 'random_state')
 LRmb_randomState.grid(row=1, column=1, padx=10, pady=5, sticky=EW)
 LRmb_randomState.grid_columnconfigure(0, weight=1)
@@ -1968,7 +1985,7 @@ LRmb_randomState_entry=CTkEntry(
     )
 LRmb_randomState_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_solver=tk.StringVar(value=LRVar_solver_options[0])
+LRmbVar_solver=StringVar(value=LRVar_solver_options[0])
 LRmb_solver = build_ArgListLabelFrame(LRmb_hyperParams, 'solver')
 LRmb_solver.grid(row=1, column=2, padx=10, pady=5, sticky=EW)
 LRmb_solver.grid_columnconfigure(0, weight=1)
@@ -1986,7 +2003,7 @@ LRmb_solver_entry=CTkOptionMenu(
     )
 LRmb_solver_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_warmStart=tk.StringVar(value='False')
+LRmbVar_warmStart=StringVar(value='False')
 LRmb_warmStart = build_ArgListLabelFrame(LRmb_hyperParams, 'warm_start')
 LRmb_warmStart.grid(row=1, column=3, padx=10, pady=5, sticky=EW)
 LRmb_warmStart.grid_columnconfigure(0, weight=1)
@@ -2004,7 +2021,7 @@ LRmb_warmStart_entry=CTkOptionMenu(
     )
 LRmb_warmStart_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_max_iter=tk.StringVar(value='100')
+LRmbVar_max_iter=StringVar(value='100')
 LRmb_max_iter = build_ArgListLabelFrame(LRmb_hyperParams, 'max_iter')
 LRmb_max_iter.grid(row=1, column=4, padx=10, pady=5, sticky=EW)
 LRmb_max_iter.grid_columnconfigure(0, weight=1)
@@ -2019,7 +2036,7 @@ LRmb_max_iter_entry=CTkEntry(
 LRmb_max_iter_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 LRVar_multi_class_options = ['auto', 'ovr', 'multinomial']
-LRmbVar_multi_class=tk.StringVar(value=LRVar_multi_class_options[0])
+LRmbVar_multi_class=StringVar(value=LRVar_multi_class_options[0])
 LRmb_multi_class = build_ArgListLabelFrame(LRmb_hyperParams, 'multi_class')
 LRmb_multi_class.grid(row=2, column=0, padx=10, pady=5, sticky=EW)
 LRmb_multi_class.grid_columnconfigure(0, weight=1)
@@ -2037,7 +2054,7 @@ LRmb_multi_class_entry=CTkOptionMenu(
     )
 LRmb_multi_class_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LRmbVar_n_jobs=tk.StringVar(value='None')
+LRmbVar_n_jobs=StringVar(value='None')
 LRmb_n_jobs = build_ArgListLabelFrame(LRmb_hyperParams, 'n_jobs')
 LRmb_n_jobs.grid(row=2, column=1, padx=10, pady=5, sticky=EW)
 LRmb_n_jobs.grid_columnconfigure(0, weight=1)
