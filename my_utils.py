@@ -627,7 +627,8 @@ class CustomWarningBox:
                 master=warnings_frame,
                 text=f"{idx}. {warning}" if len(self.warnings)>1 else f"{warning}",
                 bg_color="white",
-                font=self.my_font
+                font=self.my_font,
+                wraplength=400
             )
             warning_label.grid(row=idx, column=0, sticky=W, padx=20, pady=5, columnspan=2)
 
@@ -649,3 +650,68 @@ class CustomWarningBox:
         self.warning_box.transient(self.parent)
         self.warning_box.grab_set()
         self.warning_box.resizable(False, False)
+
+class CustomSuccessBox:
+    def __init__(self, parent, message, my_font):
+        self.parent = parent
+        self.message = message
+        self.my_font = my_font
+
+        self.message_box = CTkToplevel(parent, fg_color='white')
+        self.message_box.title("Success")
+
+        # Configure grid to center elements
+        self.message_box.grid_rowconfigure(0, weight=1)  # Space above the image
+        self.message_box.grid_rowconfigure(1, weight=1)  # Space for messages
+        self.message_box.grid_rowconfigure(2, weight=1)  # Space for button
+        self.message_box.grid_columnconfigure(0, weight=1)  # Center all columns
+
+        self.create_widgets()
+
+    def create_widgets(self):
+        # Add an icon or image at the top
+        successImg = CTkImage(Image.open(getImgPath('success1.png')), size=(100, 100))
+
+        img_label = CTkLabel(
+            master=self.message_box, 
+            image=successImg, 
+            text="Success",
+            compound=TOP,
+            bg_color="white",
+            text_color="teal",
+            font=self.my_font,
+            anchor=CENTER
+        )
+        img_label.grid(row=0, column=0, pady=10, padx=10)
+
+        # Add the messages list with bullet points
+        messages_frame = CTkFrame(self.message_box, fg_color='white')
+        messages_frame.grid(row=1, column=0, padx=20)
+
+        message_label = CTkLabel(
+            master=messages_frame,
+            text=f"{self.message}",
+            bg_color="white",
+            font=self.my_font,
+            wraplength=400
+        )
+        message_label.grid(row=1, column=0, sticky=W, padx=20, pady=5, columnspan=2)
+        
+        # Add a Close button
+        close_button = CTkButton(
+            master=self.message_box, 
+            text="OK",
+            fg_color=COLORS['MEDIUMGREEN_FG'],
+            hover_color=COLORS['MEDIUMGREEN_HOVER_FG'],
+            text_color='white',
+            border_spacing=0, 
+            corner_radius=0,
+            font=self.my_font,
+            command=self.message_box.destroy
+        )
+        close_button.grid(row=2, column=0, pady=10)
+
+        # Keep the window on top and modal
+        self.message_box.transient(self.parent)
+        self.message_box.grab_set()
+        self.message_box.resizable(False, False)

@@ -1,8 +1,12 @@
 from customtkinter import *
-from my_utils import InProgressWindow, CustomWarningBox
+from my_utils import InProgressWindow, CustomWarningBox, CustomSuccessBox
 from time import sleep
 from json import dumps as jsonDumps
+from ml_utils import *
 
+def convertStrToIntOrFloat(value: str):
+    return float(value) if '.' in value else int(value)
+    
 def format_list_display(A:list):
     nE = len(A)
     if nE>6:
@@ -48,12 +52,33 @@ def RF_HP_OPTIM_SUBMIT (master:CTk, loading_gif_path:str, RF_inputs: dict, RF_re
         
     master.after(2000, update_progress)
 
-def RF_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, RFmb_inputs: dict, RFmb_resultsVar: StringVar, font: CTkFont):
+def RF_MODEL_BUILD_SUBMIT (
+        master:CTk, loading_gif_path:str, 
+        RFmb_inputs: dict, RFmb_resultsVar: StringVar, font: CTkFont,
+        trainEntryVar: StringVar, testEntryVar: StringVar):
+    
     inProgress = InProgressWindow(master, loading_gif_path)
     inProgress.create()
+
+    def update_success (processOutput: dict):
+        inProgress.destroy()
+        RFmb_resultsVar.set(jsonDumps(processOutput, indent=4))
+        CustomSuccessBox(master, "Calculations Completed !!", font)
+        
+    def update_failure (warnings: list):
+        inProgress.destroy()
+        RFmb_resultsVar.set('..')
+        CustomWarningBox(master, warnings, font)
     
     RFmb_out = {k:v.get() for k,v in RFmb_inputs.items()}
     WARNINGS = []
+
+    # FEATURES
+    if not len(RFmb_out["FEATURES"]):
+        master.after(1000, lambda warnings=['No FEATURES selected !!']: update_failure(warnings))
+        return
+    else:
+        RFmb_out["FEATURES"] = RFmb_out["FEATURES"].split(',')
 
     # n_estimators
     try:
@@ -69,13 +94,13 @@ def RF_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, RFmb_inputs: dict, 
 
     # MIN_SAMPLE_SPLIT
     try:
-        RFmb_out["MIN_SAMPLE_SPLIT"] = float(RFmb_out["MIN_SAMPLE_SPLIT"])
+        RFmb_out["MIN_SAMPLE_SPLIT"] = convertStrToIntOrFloat(RFmb_out["MIN_SAMPLE_SPLIT"])
     except:
         WARNINGS.append('MIN_SAMPLE_SPLIT must be int or float')
     
     # MIN_SAMPLE_LEAF
     try:
-        RFmb_out["MIN_SAMPLE_LEAF"] = float(RFmb_out["MIN_SAMPLE_LEAF"])
+        RFmb_out["MIN_SAMPLE_LEAF"] = convertStrToIntOrFloat(RFmb_out["MIN_SAMPLE_LEAF"])
     except:
         WARNINGS.append('MIN_SAMPLE_LEAF must be int or float')
 
@@ -91,6 +116,9 @@ def RF_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, RFmb_inputs: dict, 
     except:
         WARNINGS.append("RANDOM_STATE must be an INTEGER or 'None'")
 
+    # WARM START
+    RFmb_out["WARM_START"] = True if RFmb_out["WARM_START"].lower()=='true' else False
+
     # MAX_FEATURES
     try:
         if RFmb_out["MAX_FEATURES"].lower()=='none':
@@ -98,7 +126,7 @@ def RF_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, RFmb_inputs: dict, 
         elif RFmb_out["MAX_FEATURES"].lower() in ['sqrt', 'log2']:
             RFmb_out["MAX_FEATURES"] = RFmb_out["MAX_FEATURES"].lower()
         else:
-            RFmb_out["MAX_FEATURES"] = float(RFmb_out["MAX_FEATURES"])
+            RFmb_out["MAX_FEATURES"] = convertStrToIntOrFloat(RFmb_out["MAX_FEATURES"])
     except:
         WARNINGS.append("MAX_FEATURES must be an INTEGER, FLOAT or either of 'sqrt'/'log2'/None")
     
@@ -114,17 +142,17 @@ def RF_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, RFmb_inputs: dict, 
     except:
         WARNINGS.append("MAX_LEAF_NODES must be an INTEGER")
     
-    def update_success ():
-        inProgress.destroy()
-        RFmb_resultsVar.set(jsonDumps(RFmb_out, indent=4))
-        
-    def update_failure (warnings: list):
-        inProgress.destroy()
-        RFmb_resultsVar.set('..')
-        CustomWarningBox(master, warnings, font)
-
     if len(WARNINGS) == 0:
-        master.after(2000, update_success)
+        print("VALIDATED_INPUTS: ", jsonDumps(RFmb_out, indent=4))
+        try:
+            processResultDict = RF_MODEL_BUILD_PROCESS(
+                RfMB_ValidatedInputs=RFmb_out, 
+                trainFilePath=trainEntryVar.get(),
+                testFilePath=testEntryVar.get()
+            )
+            master.after(1000, lambda processOut=processResultDict: update_success(processOut))
+        except Exception as ex:
+            master.after(1000, lambda warnings=[str(ex)]: update_failure(warnings))
     else:
         master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))
 

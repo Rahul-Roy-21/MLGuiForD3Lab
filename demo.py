@@ -13,7 +13,7 @@ root.grid_columnconfigure(tuple(range(1,8)), weight=1) # 8 columns
 root.grid_rowconfigure(tuple(range(2,11)),weight=1) # Only Side_panel and task_panel will expand
 
 # FONTS
-my_font1 = CTkFont(family='courier prime', size=13, weight='normal')
+my_font1 = CTkFont(family='appleGothic', size=12, weight='normal')
 RESULTS_LOADING_IMG_PATH = getImgPath('loading.gif')
 
 dataset_frame = CTkFrame(master=root, fg_color=COLORS['SKYBLUE_FG'])
@@ -1478,6 +1478,7 @@ RFmb_maxLeafNodes_entry=CTkEntry(
 RFmb_maxLeafNodes_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 RFmb_inputs = {
+    "FEATURES": SELECTED_FEATURES,
     "N_ESTIMATORS": RFmbVar_nEstimators,
     "CRITERION": RFmbVar_criterion,
     "MAX_DEPTH": RFmbVar_maxDepth,
@@ -1485,7 +1486,7 @@ RFmb_inputs = {
     "MIN_SAMPLE_LEAF": RFmbVar_minSamplesLeaf,
     "MIN_IMPURITY_DECREASE": RFmbVar_minImpurityDecrease,
     "RANDOM_STATE": RFmbVar_randomState,
-    "WARM_STATE": RFmbVar_warmStart,
+    "WARM_START": RFmbVar_warmStart,
     "MAX_FEATURES": RFmbVar_maxFeatures,
     "MIN_WEIGHT_FRACTION_LEAF": RFmbVar_minWeightFractionLeaf,
     "MAX_LEAF_NODES": RFmbVar_maxLeafNodes
@@ -1501,7 +1502,7 @@ RFmb_submitBtn = CTkButton(
     corner_radius=0,
     width=200,
     border_spacing=0,
-    command=lambda: RF_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, RFmb_inputs, RFmb_resultsVar, my_font1)
+    command=lambda: RF_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, RFmb_inputs, RFmb_resultsVar, my_font1, train_entryVar, test_entryVar)
 )
 RFmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
 
