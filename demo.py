@@ -1708,6 +1708,7 @@ SVMmb_break_ties_entry=CTkOptionMenu(
 SVMmb_break_ties_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 SVMmb_inputs = {
+    "FEATURES": SELECTED_FEATURES,
     "C": SVMmbVar_C_field,
     "KERNEL": SVMmbVar_kernel,
     "DEGREE": SVMmbVar_degree,
@@ -1731,7 +1732,7 @@ SVMmb_submitBtn = CTkButton(
     corner_radius=0,
     width=200,
     border_spacing=0,
-    command=lambda: SVM_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, SVMmb_inputs, SVMmb_resultsVar, my_font1)
+    command=lambda: SVM_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, SVMmb_inputs, SVMmb_resultsVar, my_font1, train_entryVar, test_entryVar)
 )
 SVMmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
 

@@ -52,10 +52,7 @@ def RF_HP_OPTIM_SUBMIT (master:CTk, loading_gif_path:str, RF_inputs: dict, RF_re
         
     master.after(2000, update_progress)
 
-def RF_MODEL_BUILD_SUBMIT (
-        master:CTk, loading_gif_path:str, 
-        RFmb_inputs: dict, RFmb_resultsVar: StringVar, font: CTkFont,
-        trainEntryVar: StringVar, testEntryVar: StringVar):
+def RF_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, RFmb_inputs: dict, RFmb_resultsVar: StringVar, font: CTkFont, trainEntryVar: StringVar, testEntryVar: StringVar):
     
     inProgress = InProgressWindow(master, loading_gif_path)
     inProgress.create()
@@ -143,7 +140,7 @@ def RF_MODEL_BUILD_SUBMIT (
         WARNINGS.append("MAX_LEAF_NODES must be an INTEGER")
     
     if len(WARNINGS) == 0:
-        print("VALIDATED_INPUTS: ", jsonDumps(RFmb_out, indent=4))
+        print("[RF] VALIDATED_INPUTS: ", RFmb_out)
         try:
             processResultDict = RF_MODEL_BUILD_PROCESS(
                 RfMB_ValidatedInputs=RFmb_out, 
@@ -156,12 +153,29 @@ def RF_MODEL_BUILD_SUBMIT (
     else:
         master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))
 
-def SVM_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, SVMmb_inputs: dict, SVMmb_resultsVar: StringVar, font: CTkFont):
+def SVM_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, SVMmb_inputs: dict, SVMmb_resultsVar: StringVar, font: CTkFont, trainEntryVar: StringVar, testEntryVar: StringVar):
     inProgress = InProgressWindow(master, loading_gif_path)
     inProgress.create()
     
+    def update_success (processOutput: dict):
+        inProgress.destroy()
+        SVMmb_resultsVar.set(jsonDumps(processOutput, indent=4))
+        CustomSuccessBox(master, "Calculations Completed !!", font)
+        
+    def update_failure (warnings: list):
+        inProgress.destroy()
+        SVMmb_resultsVar.set('..')
+        CustomWarningBox(master, warnings, font)
+
     SVMmb_out = {k:v.get() for k,v in SVMmb_inputs.items()}
     WARNINGS = []
+
+    # FEATURES
+    if not len(SVMmb_out["FEATURES"]):
+        master.after(1000, lambda warnings=['No FEATURES selected !!']: update_failure(warnings))
+        return
+    else:
+        SVMmb_out["FEATURES"] = SVMmb_out["FEATURES"].split(',')
 
     # C
     try:
@@ -187,23 +201,30 @@ def SVM_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, SVMmb_inputs: dict
     except:
         WARNINGS.append('TOL must be float')
 
+    # SHRINKING
+    SVMmb_out["SHRINKING"] = True if SVMmb_out["SHRINKING"].lower()=='true' else False
+    # PROBABILITY
+    SVMmb_out["PROBABILITY"] = True if SVMmb_out["PROBABILITY"].lower()=='true' else False
+    # SHRINKING
+    SVMmb_out["BREAK_TIES"] = True if SVMmb_out["BREAK_TIES"].lower()=='true' else False
+
     # RANDOM_STATE
     try:
         SVMmb_out["RANDOM_STATE"] = None if SVMmb_out["RANDOM_STATE"].lower()=='none' else int(SVMmb_out["RANDOM_STATE"])
     except:
         WARNINGS.append("RANDOM_STATE must be an INTEGER or 'None'")
     
-    def update_success ():
-        inProgress.destroy()
-        SVMmb_resultsVar.set(jsonDumps(SVMmb_out, indent=4))
-        
-    def update_failure (warnings: list):
-        inProgress.destroy()
-        SVMmb_resultsVar.set('..')
-        CustomWarningBox(master, warnings, font)
-
     if len(WARNINGS) == 0:
-        master.after(2000, update_success)
+        print("[SVM] VALIDATED_INPUTS: ", SVMmb_out)
+        try:
+            processResultDict = SVM_MODEL_BUILD_PROCESS(
+                SvmMB_ValidatedInputs=SVMmb_out, 
+                trainFilePath=trainEntryVar.get(),
+                testFilePath=testEntryVar.get()
+            )
+            master.after(1000, lambda processOut=processResultDict: update_success(processOut))
+        except Exception as ex:
+            master.after(1000, lambda warnings=[str(ex)]: update_failure(warnings))
     else:
         master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))
 
