@@ -140,7 +140,7 @@ def RF_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, RFmb_inputs: dict, 
         WARNINGS.append("MAX_LEAF_NODES must be an INTEGER")
     
     if len(WARNINGS) == 0:
-        print("[RF] VALIDATED_INPUTS: ", RFmb_out)
+        print("[RF] VALIDATED_INPUTS: ", jsonDumps(RFmb_out, indent=2))
         try:
             processResultDict = RF_MODEL_BUILD_PROCESS(
                 RfMB_ValidatedInputs=RFmb_out, 
@@ -215,7 +215,7 @@ def SVM_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, SVMmb_inputs: dict
         WARNINGS.append("RANDOM_STATE must be an INTEGER or 'None'")
     
     if len(WARNINGS) == 0:
-        print("[SVM] VALIDATED_INPUTS: ", SVMmb_out)
+        print("[SVM] VALIDATED_INPUTS: ", jsonDumps(SVMmb_out, indent=2))
         try:
             processResultDict = SVM_MODEL_BUILD_PROCESS(
                 SvmMB_ValidatedInputs=SVMmb_out, 
@@ -228,12 +228,29 @@ def SVM_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, SVMmb_inputs: dict
     else:
         master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))
 
-def LDA_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, LDAmb_inputs: dict, LDAmb_resultsVar: StringVar, font: CTkFont):
+def LDA_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, LDAmb_inputs: dict, LDAmb_resultsVar: StringVar, font: CTkFont, trainEntryVar: StringVar, testEntryVar: StringVar):
     inProgress = InProgressWindow(master, loading_gif_path)
     inProgress.create()
     
+    def update_success (processOutput: dict):
+        inProgress.destroy()
+        LDAmb_resultsVar.set(jsonDumps(processOutput, indent=4))
+        CustomSuccessBox(master, "Calculations Completed !!", font)
+        
+    def update_failure (warnings: list):
+        inProgress.destroy()
+        LDAmb_resultsVar.set('..')
+        CustomWarningBox(master, warnings, font)
+
     LDAmb_out = {k:v.get() for k,v in LDAmb_inputs.items()}
     WARNINGS = []
+
+    # FEATURES
+    if not len(LDAmb_out["FEATURES"]):
+        master.after(1000, lambda warnings=['No FEATURES selected !!']: update_failure(warnings))
+        return
+    else:
+        LDAmb_out["FEATURES"] = LDAmb_out["FEATURES"].split(',')
 
     # SHRINKAGE
     try:
@@ -258,26 +275,46 @@ def LDA_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, LDAmb_inputs: dict
     except:
         WARNINGS.append('TOL must be float')
 
-    def update_success ():
-        inProgress.destroy()
-        LDAmb_resultsVar.set(jsonDumps(LDAmb_out, indent=4))
-        
-    def update_failure (warnings: list):
-        inProgress.destroy()
-        LDAmb_resultsVar.set('..')
-        CustomWarningBox(master, warnings, font)
+    # STORE_COVARIANCE
+    LDAmb_out["STORE_COVARIANCE"] = True if LDAmb_out["STORE_COVARIANCE"].lower()=='true' else False
 
     if len(WARNINGS) == 0:
-        master.after(2000, update_success)
+        print("[SVM] VALIDATED_INPUTS: ", jsonDumps(LDAmb_out, indent=2))
+        try:
+            processResultDict = LDA_MODEL_BUILD_PROCESS(
+                LdaMB_ValidatedInputs=LDAmb_out, 
+                trainFilePath=trainEntryVar.get(),
+                testFilePath=testEntryVar.get()
+            )
+            master.after(1000, lambda processOut=processResultDict: update_success(processOut))
+        except Exception as ex:
+            master.after(1000, lambda warnings=[str(ex)]: update_failure(warnings))
     else:
         master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))
 
-def LR_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, LRmb_inputs: dict, LRmb_resultsVar: StringVar, font: CTkFont):
+def LR_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, LRmb_inputs: dict, LRmb_resultsVar: StringVar, font: CTkFont, trainEntryVar: StringVar, testEntryVar: StringVar):
     inProgress = InProgressWindow(master, loading_gif_path)
     inProgress.create()
     
+    def update_success (processOutput: dict):
+        inProgress.destroy()
+        LRmb_resultsVar.set(jsonDumps(processOutput, indent=4))
+        CustomSuccessBox(master, "Calculations Completed !!", font)
+        
+    def update_failure (warnings: list):
+        inProgress.destroy()
+        LRmb_resultsVar.set('..')
+        CustomWarningBox(master, warnings, font)
+
     LRmb_out = {k:v.get() for k,v in LRmb_inputs.items()}
     WARNINGS = []
+
+    # FEATURES
+    if not len(LRmb_out["FEATURES"]):
+        master.after(1000, lambda warnings=['No FEATURES selected !!']: update_failure(warnings))
+        return
+    else:
+        LRmb_out["FEATURES"] = LRmb_out["FEATURES"].split(',')
 
     # L1_RATIO
     try:
@@ -325,16 +362,21 @@ def LR_MODEL_BUILD_SUBMIT (master:CTk, loading_gif_path:str, LRmb_inputs: dict, 
     except:
         WARNINGS.append("N_JOBS must be an integer or None")
     
-    def update_success ():
-        inProgress.destroy()
-        LRmb_resultsVar.set(jsonDumps(LRmb_out, indent=4))
-        
-    def update_failure (warnings: list):
-        inProgress.destroy()
-        LRmb_resultsVar.set('..')
-        CustomWarningBox(master, warnings, font)
+    # FIT_INTERCEPT
+    LRmb_out["FIT_INTERCEPT"] = True if LRmb_out["FIT_INTERCEPT"].lower()=='true' else False
+    # WARM_START
+    LRmb_out["WARM_START"] = True if LRmb_out["WARM_START"].lower()=='true' else False
 
     if len(WARNINGS) == 0:
-        master.after(2000, update_success)
+        print("[LR] VALIDATED_INPUTS: ", jsonDumps(LRmb_out, indent=2))
+        try:
+            processResultDict = LR_MODEL_BUILD_PROCESS(
+                LrMB_ValidatedInputs=LRmb_out, 
+                trainFilePath=trainEntryVar.get(),
+                testFilePath=testEntryVar.get()
+            )
+            master.after(1000, lambda processOut=processResultDict: update_success(processOut))
+        except Exception as ex:
+            master.after(1000, lambda warnings=[str(ex)]: update_failure(warnings))
     else:
         master.after(1000, lambda warnings=WARNINGS: update_failure(warnings))

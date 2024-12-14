@@ -13,7 +13,7 @@ root.grid_columnconfigure(tuple(range(1,8)), weight=1) # 8 columns
 root.grid_rowconfigure(tuple(range(2,11)),weight=1) # Only Side_panel and task_panel will expand
 
 # FONTS
-my_font1 = CTkFont(family='appleGothic', size=12, weight='normal')
+my_font1 = CTkFont(family='Baghdad', size=12, weight='normal')
 RESULTS_LOADING_IMG_PATH = getImgPath('loading.gif')
 
 dataset_frame = CTkFrame(master=root, fg_color=COLORS['SKYBLUE_FG'])
@@ -1776,7 +1776,7 @@ LDAmb_solver_entry=CTkOptionMenu(
     )
 LDAmb_solver_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
-LDAmbVar_shrinkage=StringVar(value=3)
+LDAmbVar_shrinkage=StringVar(value='None')
 LDAmb_shrinkage = build_ArgListLabelFrame(LDAmb_hyperParams, 'shrinkage')
 LDAmb_shrinkage.grid(row=0, column=1, padx=10, pady=5, sticky=EW)
 LDAmb_shrinkage.grid_columnconfigure(0, weight=1)
@@ -1837,6 +1837,7 @@ LDAmb_store_covariance_entry=CTkOptionMenu(
 LDAmb_store_covariance_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 LDAmb_inputs = {
+    "FEATURES": SELECTED_FEATURES,
     "SOLVER": LDAmbVar_solver,
     "SHRINKAGE": LDAmbVar_shrinkage,
     'N_COMPONENTS': LDAmbVar_n_components,
@@ -1854,7 +1855,7 @@ LDAmb_submitBtn = CTkButton(
     corner_radius=0,
     width=200,
     border_spacing=0,
-    command=lambda: LDA_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, LDAmb_inputs, LDAmb_resultsVar, my_font1)
+    command=lambda: LDA_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, LDAmb_inputs, LDAmb_resultsVar, my_font1, train_entryVar, test_entryVar)
 )
 LDAmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
 
@@ -2071,6 +2072,7 @@ LRmb_n_jobs_entry=CTkEntry(
 LRmb_n_jobs_entry.grid(row=0, column=0, padx=10, pady=5, sticky=EW)
 
 LRmb_inputs = {
+    "FEATURES": SELECTED_FEATURES,
     "L1_RATIO": LRmbVar_l1_ratio,
     "PENALTY": LRmbVar_penalty,
     "TOL": LRmbVar_tol,
@@ -2095,7 +2097,7 @@ LRmb_submitBtn = CTkButton(
     corner_radius=0,
     width=200,
     border_spacing=0,
-    command=lambda: LR_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, LRmb_inputs, LRmb_resultsVar, my_font1)
+    command=lambda: LR_MODEL_BUILD_SUBMIT(root, RESULTS_LOADING_IMG_PATH, LRmb_inputs, LRmb_resultsVar, my_font1, train_entryVar, test_entryVar)
 )
 LRmb_submitBtn.grid(row=3, column=0, columnspan=5, padx=10, pady=10)
 
